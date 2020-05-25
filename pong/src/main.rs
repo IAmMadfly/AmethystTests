@@ -8,7 +8,7 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-mod Pong
+mod Pong;
 
 use crate::pong::Pong;
 
