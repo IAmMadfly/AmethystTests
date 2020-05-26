@@ -5,10 +5,13 @@ use amethyst::{
         types::DefaultBackend,
         RenderingBundle,
     },
+    core::transform::{
+        TransformBundle
+    },
     utils::application_root_dir,
 };
 
-mod Pong;
+mod pong;
 
 use crate::pong::Pong;
 
@@ -17,7 +20,9 @@ fn main() -> amethyst::Result<()> {
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("config").join("display.ron");
+    
     let game_data = GameDataBuilder::default()
+        .with_bundle(TransformBundle::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(

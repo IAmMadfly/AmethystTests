@@ -6,17 +6,41 @@ use sdl2::keyboard::Keycode;
 
 use std::time::Duration;
 
+fn check_option(opt:Option<u128>) {
+    match opt {
+        None => println!("It was none!"),
+        Some(3) => println!("It was exactly 3!"),
+        Some(_) => println!("It was some!")
+    }
+}
 
+fn plus_one(i: &mut i32) {
+    *i = *i + 1_i32;
+}
+ 
 fn main() {
+    let mut poss: Option<u128> = None;
+    check_option(poss);
+    poss = Some(3);
+    check_option(poss);
+
+    let mut val: i32 = 0;
+    plus_one(&mut val);
+    println!("Value is: {}", val);
+
     println!("Hello, world!");
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem.window("Karls freaking POWER!", 800, 600)
+                                .resizable()
+                                .borderless()
                                 .position_centered()
                                 .build()
                                 .unwrap();
+
+    //window.set_bordered(false);
     
     let mut canvas = window.into_canvas().build().unwrap();
 
