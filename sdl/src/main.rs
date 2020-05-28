@@ -25,12 +25,12 @@ fn main() {
 
     println!("Hello, world!");
 
-    let mut numb = 0;
+    let game = engine::initialise();
 
-    while numb < 10 {
-        println!("Loop running!");
+    if game.running {
+        println!("Game started successfully!");
 
-        numb = numb + 1;
+        engine::get_window(game, String::from("This is a thing"));
     }
 
     /*
