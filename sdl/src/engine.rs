@@ -14,12 +14,31 @@ extern crate sdl2;
 
 //use std::time::Duration;
 
-use sdl2::Sdl;
-
 pub struct Game {
-    pub running:        bool,
-    sdl_context:        Option<Sdl>,
+    running:            bool,
+    sdl_context:        Option<sdl2::Sdl>,
     window:             Option<sdl2::video::Window>
+}
+
+impl Game {
+    pub fn new() -> Game {
+        Game{
+            running:        false,
+            sdl_context:    None,
+            window:         None
+        }
+    }
+
+    pub fn running(&self) -> bool {
+        self.running
+    }
+
+    pub fn initialize(&self) {
+        match &self.sdl_context {
+            Some(con) => println!("More"),
+            None => println!("Nothing!")
+        }
+    }
 }
 
 pub fn initialise() -> Game {
