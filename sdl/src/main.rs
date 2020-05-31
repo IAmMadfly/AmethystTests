@@ -2,11 +2,15 @@
 mod engine;
 
 fn main() {
-    let game = engine::Game::new();
+    let mut game = engine::Game::new();
 
     match game.running() {
         true => println!("Game running!"),
         false => println!("Game not running yet!")
     }
     game.initialize();
+
+    while game.running() {
+        game.process_input();
+    }
 }

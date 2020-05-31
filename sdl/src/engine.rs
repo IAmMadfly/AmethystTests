@@ -9,23 +9,55 @@
 extern crate sdl2;
 
 //use sdl2::pixels::Color;
-//use sdl2::event::Event;
-//use sdl2::keyboard::Keycode;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
 
 //use std::time::Duration;
 
 pub struct Game {
     running:            bool,
-    sdl_context:        Option<sdl2::Sdl>,
-    window:             Option<sdl2::video::Window>
+    sdl_context:        sdl2::Sdl,
+    window:             Option<sdl2::video::Window>,
+    event_pump:         Option<sdl2::EventPump>,
+    elements:           Elements
+}
+
+struct Elements {
+    elements:           Vec<Element>
+}
+
+struct Element {
+    word:               String,
+    point:              Point,
+    size:               Size
+}
+
+struct Point {
+    x:                  i32,
+    y:                  i32
+}
+
+struct Size {
+    x:                  i32,
+    y:                  i32
+}
+
+impl Elements {
+    fn default() -> Elements {
+        Elements{
+            elements: Vec::<Element>::new()
+        }
+    }
 }
 
 impl Game {
     pub fn new() -> Game {
         Game{
-            running:        false,
-            sdl_context:    None,
-            window:         None
+            running:            true,
+            sdl_context:        sdl2::init().unwrap(),
+            window:             None,
+            event_pump:         None,
+            elements:           Elements::default()
         }
     }
 
@@ -33,57 +65,55 @@ impl Game {
         self.running
     }
 
-    pub fn initialize(&self) {
-        match &self.sdl_context {
-            Some(con) => println!("More"),
-            None => println!("Nothing!")
+    pub fn initialize(&mut self) {
+        self.window = get_window(&self.sdl_context);
+    }
+
+    pub fn process_input(&mut self) {
+        if self.event_pump.is_some() {
+            let event_poll = self.event_pump.as_mut().unwrap().poll_iter();
+                for event in event_poll {
+                    match event {
+                        Event::Quit {..} | 
+                        Event::KeyDown {keycode: Some(Keycode::Escape), .. } => self.running = false,
+                        Event::KeyDown {keycode: Some(key), ..} => process_key(key, &mut self.elements),
+                        _ => println!("Different event!")
+                    }
+                }
+        } else {
+            println!("No event pump available!");
         }
+    }
+
+    pub fn update(&mut self) {
+
     }
 }
 
-pub fn initialise() -> Game {
-    let sdl_context = sdl2::init();
-    
-    match sdl_context {
-        Ok(context) => {
-            println!("Got sdl successfully");
-            Game{
-                running:        true, 
-                sdl_context:    Some(context), 
-                window:         None
+fn process_key(key: Keycode, elements: &mut Elements) {
+    match key {
+        Keycode::W => println!("Up"),
+        Keycode::S => println!("Down"),
+        Keycode::A => println!("Left"),
+        Keycode::D => println!("Right"),
+        _ => println!("Keycode: {}", key)
+    }
+}
+
+fn get_window(sdl: &sdl2::Sdl) -> Option<sdl2::video::Window> {
+    match sdl.video() {
+        Ok(vid) => {
+            match vid.window("Game", 800, 600).position_centered().build() {
+                Ok(wind) => Some(wind),
+                Err(e) => {
+                    println!("Failed to get window, Err: {}", e);
+                    None
+                }
             }
-        }
+        },
         Err(e) => {
-            println!("Error was: {}", e);
-            Game{running: false, sdl_context: None, window: None}
+            println!("Failed to get Video subsystem. Err: {}", e);
+            None
         }
     }
 }
-
-pub fn get_window(mut game: Game, title: String) -> Game {
-    if game.running {
-        if let Some(s) = &game.sdl_context {
-            println!("Returning game with Window!");
-            game.window = Some(s.video().unwrap()
-                                        .window(title.as_str(), 800, 600)
-                                        .position_centered()
-                                        .build()
-                                        .unwrap());
-        }
-    }
-    game
-}
-
-/*
-pub fn update_components() {
-    println!("Processing");
-}
-
-pub fn update_input() {
-    println!("Taking and processing input");
-}
-
-pub fn destroy() {
-    println!("Destroying game!");
-}
-*/
