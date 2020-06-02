@@ -9,6 +9,10 @@ use amethyst::{
         TransformBundle
     },
     utils::application_root_dir,
+    input::{
+        InputBundle,
+        StringBindings
+    }
 };
 
 mod pong;
@@ -20,9 +24,15 @@ fn main() -> amethyst::Result<()> {
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("config").join("display.ron");
-    
+
+    let binding_path = app_root.join("config").join("bindings.ron");
+
+    let input_bundle = InputBundle::<StringBindings>::new()
+                       .with_bindings_from_file(binding_path).expect("Failed to get bindings file!");
+
     let game_data = GameDataBuilder::default()
-        .with_bundle(TransformBundle::new())?
+        .with_bundle(TransformBundle::new()).expect("Failed to bind Transform bundle!")
+        .with_bundle(input_bundle).expect("Failed to bind Input bundle!")
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
@@ -31,7 +41,7 @@ fn main() -> amethyst::Result<()> {
                 ).with_plugin(
                     RenderFlat2D::default()
                 )
-        )?;
+        ).expect("Failed to bind Rendering bundle!");
     let assets_dir = app_root.join("assets");
 
     let mut game = Application::new(assets_dir, Pong, game_data)?;
