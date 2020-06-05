@@ -33,6 +33,7 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new()).expect("Failed to bind Transform bundle!")
         .with_bundle(input_bundle).expect("Failed to bind Input bundle!")
+        .with(systems::PaddleSystem, "paddle_system", &["input_system"])
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
