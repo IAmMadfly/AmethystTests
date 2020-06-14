@@ -9,42 +9,35 @@
 extern crate sdl2;
 extern crate sdl2_sys;
 
-//use sdl2::pixels::Color;
+mod element;
+mod tools;
+
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 //use std::time::Duration;
 
-struct Size {
-    width:      u32,
-    height:     u32
-}
-
 pub struct Game {
     running:            bool,
     sdl_context:        sdl2::Sdl,
-    canvas:             Option<sdl2::render::Canvas<sdl2::video::Window>>,
-    elements:           Vec<Element>
-}
-
-struct Element {
-    point:              Point,
-    z:                  u32,
-    size:               Size
-}
-
-struct Point {
-    x:                  i32,
-    y:                  i32
+    canvas:             sdl2::render::Canvas<sdl2::video::Window>,
+    elements:           Vec<Box<dyn element::Element>>,
+    last_time_update:   std::time::Instant
 }
 
 impl Game {
     pub fn new() -> Game {
+        let sdl = sdl2::init().expect("Failed to get SDL context!");
         Game{
             running:            false,
-            sdl_context:        sdl2::init().expect("Failed to get SDL context!"),
-            canvas:             None,
-            elements:           Vec::new()
+            canvas:             get_window_contents(
+                                    &sdl, tools::Size{width: 800, height: 600}
+                                ),
+            sdl_context:        sdl,
+            elements:           Vec::new(),
+            last_time_update:   std::time::Instant::now()
         }
     }
 
@@ -53,24 +46,40 @@ impl Game {
     }
 
     pub fn initialize(&mut self, width: u32, height: u32) {
-        self.canvas = get_window_contents(&self.sdl_context,
-            Size{
-                width,
-                height
-            }
-        );
         self.running = true;
         self.elements.push(
-            Element{
-                point:      Point{x:0, y:0},
-                z:          1,
-                size:       Size{height:5, width:5}
-            }
+            Box::new(
+                element::Object{
+                    point:      element::Point{x:0, y:0},
+                    z:          1,
+                    size:       element::tools::Size{height:5, width:5}
+                }
+            )
         );
     }
 
-    pub fn render(&self) {
-        
+    pub fn render(&mut self) {
+
+        if let Some(ele) = self.elements.get(0) {
+            let point = ele.getPos();
+            println!("Printing in pos: {}, {}", &point.x, &point.y);
+
+            //self.canvas.clear();
+            self.canvas.set_draw_color(Color::RED);
+            if let Err(e) = self.canvas.draw_rect(
+                Rect::new(
+                    point.x, 
+                    point.y,
+                    5,
+                    5
+                )
+            ) {
+                println!("Error: {}", e);
+            } else {
+                println!("Printed fine!");
+            }
+            self.canvas.present();
+        }
     }
 
     pub fn process_input(&mut self) {
@@ -85,12 +94,19 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-        let element = self.elements.get_mut(0);
-        if let
+        if (self.last_time_update.elapsed().as_millis() > 50) {
+            self.last_time_update = std::time::Instant::now();
+
+            let element = self.elements.get_mut(0);
+
+            if let Some(ele) = element {
+                ele.movePos(1,1);
+            }
+        }
     }
 }
 
-fn process_key(key: Keycode, elements: &mut Vec<Element>) {
+fn process_key(key: Keycode, elements: &mut Vec<Box<dyn element::Element>>) {
     match key {
         Keycode::W => println!("Up"),
         Keycode::S => println!("Down"),
@@ -100,11 +116,11 @@ fn process_key(key: Keycode, elements: &mut Vec<Element>) {
     }
 }
 
-fn get_window_contents(sdl: &sdl2::Sdl, size: Size) -> Option<sdl2::render::Canvas<sdl2::video::Window>> {
+fn get_window_contents(sdl: &sdl2::Sdl, size: tools::Size) -> sdl2::render::Canvas<sdl2::video::Window> {
     match sdl.video() {
         Ok(vid) => {
             match vid.window("Epidemic", size.height, size.width).position_centered().build() {
-                Ok(wind) => Some(wind.into_canvas().build().expect("Failed to get canvas!!")),
+                Ok(wind) => wind.into_canvas().build().expect("Failed to get canvas!!"),
                 Err(e) => {
                     println!("Failed to get window, Err: {}", e);
                     panic!("No windowContents, no game!");
