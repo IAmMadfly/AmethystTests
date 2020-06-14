@@ -1,13 +1,6 @@
 
 mod engine;
 
-trait Printer {
-    fn get_name(&self) -> &String;
-
-    fn print_name(&self) {
-        println!("This is a line to be printed! - {}", self.get_name());
-    }
-}
 
 fn main() {
     let mut game = engine::Game::new();
@@ -19,4 +12,6 @@ fn main() {
         game.update();
         game.render();
     }
+
+    //game.destroy()
 }

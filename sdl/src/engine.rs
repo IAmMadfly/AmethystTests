@@ -85,7 +85,8 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-        
+        let element = self.elements.get_mut(0);
+        if let
     }
 }
 
