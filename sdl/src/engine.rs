@@ -24,7 +24,8 @@ pub struct Game {
     sdl_context:        sdl2::Sdl,
     canvas:             sdl2::render::Canvas<sdl2::video::Window>,
     elements:           Vec<Box<dyn element::Element>>,
-    last_time_update:   std::time::Instant
+    last_time_update:   std::time::Instant,
+    last_time_render:   std::time::Instant
 }
 
 impl Game {
@@ -37,7 +38,8 @@ impl Game {
                                 ),
             sdl_context:        sdl,
             elements:           Vec::new(),
-            last_time_update:   std::time::Instant::now()
+            last_time_update:   std::time::Instant::now(),
+            last_time_render:   std::time::Instant::now()
         }
     }
 
@@ -59,25 +61,26 @@ impl Game {
     }
 
     pub fn render(&mut self) {
+        if (self.last_time_render.elapsed().as_millis() as f32) < 16.5 {
+            return
+        }
+        self.last_time_render = std::time::Instant::now();
 
         if let Some(ele) = self.elements.get(0) {
             let point = ele.getPos();
-            println!("Printing in pos: {}, {}", &point.x, &point.y);
 
-            //self.canvas.clear();
+            self.canvas.set_draw_color(Color::BLACK);
+            self.canvas.clear();
+
             self.canvas.set_draw_color(Color::RED);
-            if let Err(e) = self.canvas.draw_rect(
+            self.canvas.draw_rect(
                 Rect::new(
-                    point.x, 
+                    point.x,
                     point.y,
                     5,
                     5
                 )
-            ) {
-                println!("Error: {}", e);
-            } else {
-                println!("Printed fine!");
-            }
+            );
             self.canvas.present();
         }
     }
@@ -94,14 +97,15 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-        if (self.last_time_update.elapsed().as_millis() > 50) {
-            self.last_time_update = std::time::Instant::now();
+        if self.last_time_update.elapsed().as_millis() > 50 {
+            return
+        }
+        self.last_time_update = std::time::Instant::now();
 
-            let element = self.elements.get_mut(0);
+        let element = self.elements.get_mut(0);
 
-            if let Some(ele) = element {
-                ele.movePos(1,1);
-            }
+        if let Some(ele) = element {
+            ele.movePos(1,1);
         }
     }
 }
@@ -119,7 +123,7 @@ fn process_key(key: Keycode, elements: &mut Vec<Box<dyn element::Element>>) {
 fn get_window_contents(sdl: &sdl2::Sdl, size: tools::Size) -> sdl2::render::Canvas<sdl2::video::Window> {
     match sdl.video() {
         Ok(vid) => {
-            match vid.window("Epidemic", size.height, size.width).position_centered().build() {
+            match vid.window("Epidemic", size.width, size.height).position_centered().build() {
                 Ok(wind) => wind.into_canvas().build().expect("Failed to get canvas!!"),
                 Err(e) => {
                     println!("Failed to get window, Err: {}", e);
