@@ -2,11 +2,9 @@
 #[path ="tools.rs"] pub mod tools;
 
 pub trait Element {
-    fn movePos(&mut self, x: i32, y: i32);
+    fn move_position(&mut self, x: i32, y: i32);
 
-    fn getPos(&self) -> Point;
-
-    //fn new() -> Box<dyn Element>;
+    fn get_position(&self) -> Point;
 }
 
 pub struct Point {
@@ -33,12 +31,12 @@ impl Clone for Point {
 
 impl Element for Object {
     
-    fn movePos(&mut self, x: i32, y: i32) {
+    fn move_position(&mut self, x: i32, y: i32) {
         self.point.x = self.point.x+x;
         self.point.y = self.point.y+y;
     }
 
-    fn getPos(&self) -> Point {
+    fn get_position(&self) -> Point {
         self.point.clone()
     }
 }

@@ -11,6 +11,7 @@ extern crate sdl2_sys;
 
 mod element;
 mod tools;
+mod opengl;
 
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -22,7 +23,10 @@ use sdl2::keyboard::Keycode;
 pub struct Game {
     running:            bool,
     sdl_context:        sdl2::Sdl,
+    video_subsystem:    sdl2::VideoSubsystem,
     canvas:             sdl2::render::Canvas<sdl2::video::Window>,
+    gl_context:         sdl2::video::GLContext,
+    gl_functions:       opengl::SDL_OpenGL,
     elements:           Vec<Box<dyn element::Element>>,
     last_time_update:   std::time::Instant,
     last_time_render:   std::time::Instant
@@ -31,12 +35,19 @@ pub struct Game {
 impl Game {
     pub fn new() -> Game {
         let sdl = sdl2::init().expect("Failed to get SDL context!");
+        let video_sub = sdl.video().expect("Failed to get video subsystem!");
+        let canvas = get_window_contents(
+            &video_sub, tools::Size{width: 800, height: 600}
+        );
+        let gl_context = canvas.window().gl_create_context().expect("Failed to get gl context!");
+
         Game{
             running:            false,
-            canvas:             get_window_contents(
-                                    &sdl, tools::Size{width: 800, height: 600}
-                                ),
+            canvas:             canvas,
             sdl_context:        sdl,
+            gl_functions:       opengl::SDL_OpenGL::init(&video_sub),
+            video_subsystem:    video_sub,
+            gl_context:         gl_context,
             elements:           Vec::new(),
             last_time_update:   std::time::Instant::now(),
             last_time_render:   std::time::Instant::now()
@@ -67,7 +78,7 @@ impl Game {
         self.last_time_render = std::time::Instant::now();
 
         if let Some(ele) = self.elements.get(0) {
-            let point = ele.getPos();
+            let point = ele.get_position();
 
             self.canvas.set_draw_color(Color::BLACK);
             self.canvas.clear();
@@ -80,7 +91,7 @@ impl Game {
                     5,
                     5
                 )
-            );
+            ).expect("Failed to draw rectangle!!");
             self.canvas.present();
         }
     }
@@ -97,7 +108,7 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-        if self.last_time_update.elapsed().as_millis() > 50 {
+        if self.last_time_update.elapsed().as_millis() < 50 {
             return
         }
         self.last_time_update = std::time::Instant::now();
@@ -105,7 +116,7 @@ impl Game {
         let element = self.elements.get_mut(0);
 
         if let Some(ele) = element {
-            ele.movePos(1,1);
+            ele.move_position(1,1);
         }
     }
 }
@@ -120,20 +131,12 @@ fn process_key(key: Keycode, elements: &mut Vec<Box<dyn element::Element>>) {
     }
 }
 
-fn get_window_contents(sdl: &sdl2::Sdl, size: tools::Size) -> sdl2::render::Canvas<sdl2::video::Window> {
-    match sdl.video() {
-        Ok(vid) => {
-            match vid.window("Epidemic", size.width, size.height).position_centered().build() {
-                Ok(wind) => wind.into_canvas().build().expect("Failed to get canvas!!"),
-                Err(e) => {
-                    println!("Failed to get window, Err: {}", e);
-                    panic!("No windowContents, no game!");
-                }
-            }
-        },
-        Err(e) => {
-            println!("Failed to get Video subsystem. Err: {}", e);
-            panic!("No windowContents, no game!");
-        }
-    }
+fn get_window_contents(vid: &sdl2::VideoSubsystem, size: tools::Size) -> sdl2::render::Canvas<sdl2::video::Window> {
+    let wind = vid.window("Epidemic", size.width, size.height)
+                  .position_centered()
+                  .opengl()
+                  .build()
+                  .expect("Failed to get window element from SDL");
+
+    wind.into_canvas().build().expect("Failed to get canvas!!")
 }

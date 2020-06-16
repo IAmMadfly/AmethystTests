@@ -1,9 +1,4 @@
 
-use std::{
-    thread,
-    time
-};
-
 mod engine;
 
 fn main() {
@@ -11,7 +6,12 @@ fn main() {
     
     game.initialize(600, 800);
 
-    while game.running() {
+    'main: loop {
+        // Break the loop if the game is no longer running
+        if !game.running() {
+            break;
+        }
+
         game.process_input();
         game.update();
         game.render();
