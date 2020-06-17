@@ -21,6 +21,14 @@ impl SDL_OpenGL {
             }
         }
     }
+
+    pub fn clear(&self) {
+        if self.inited {
+            unsafe {
+                gl::Clear(gl::COLOR_BUFFER_BIT);
+            }
+        }
+    }
 }
 
 fn load_gl_function(video_sub: &sdl2::VideoSubsystem) {
