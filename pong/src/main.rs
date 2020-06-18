@@ -15,6 +15,7 @@ use amethyst::{
     }
 };
 
+mod systems;
 mod pong;
 
 use crate::pong::Pong;
