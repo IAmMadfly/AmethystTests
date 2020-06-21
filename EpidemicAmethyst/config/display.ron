@@ -1,0 +1,4 @@
+(
+  title: "EpidemicAmethyst",
+  dimensions: Some((500, 500)),
+)

@@ -77,6 +77,10 @@ impl Game {
         }
         self.last_time_render = std::time::Instant::now();
 
+        self.gl_functions.clear();
+        self.canvas.window().gl_swap_window();
+
+        /*
         if let Some(ele) = self.elements.get(0) {
             let point = ele.get_position();
 
@@ -94,6 +98,7 @@ impl Game {
             ).expect("Failed to draw rectangle!!");
             self.canvas.present();
         }
+        */
     }
 
     pub fn process_input(&mut self) {
