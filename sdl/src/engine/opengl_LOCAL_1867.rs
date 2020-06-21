@@ -23,10 +23,8 @@ impl SDL_OpenGL {
     }
 
     pub fn clear(&self) {
-        if self.inited {
-            unsafe {
-                gl::Clear(gl::COLOR_BUFFER_BIT);
-            }
+        unsafe {
+            gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
 }

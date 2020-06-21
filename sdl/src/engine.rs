@@ -36,6 +36,12 @@ impl Game {
     pub fn new() -> Game {
         let sdl = sdl2::init().expect("Failed to get SDL context!");
         let video_sub = sdl.video().expect("Failed to get video subsystem!");
+        
+        let gl_attr = video_sub.gl_attr();
+        gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
+        gl_attr.set_context_version(4, 5);
+        let gl_funcs = opengl::SDL_OpenGL::init(&video_sub);
+        
         let canvas = get_window_contents(
             &video_sub, tools::Size{width: 800, height: 600}
         );
@@ -45,7 +51,7 @@ impl Game {
             running:            false,
             canvas:             canvas,
             sdl_context:        sdl,
-            gl_functions:       opengl::SDL_OpenGL::init(&video_sub),
+            gl_functions:       gl_funcs,
             video_subsystem:    video_sub,
             gl_context:         gl_context,
             elements:           Vec::new(),
@@ -84,19 +90,21 @@ impl Game {
         if let Some(ele) = self.elements.get(0) {
             let point = ele.get_position();
 
-            self.canvas.set_draw_color(Color::BLACK);
-            self.canvas.clear();
+            //self.canvas.set_draw_color(Color::BLACK);
+            //self.canvas.clear();
+            self.gl_functions.clear();
+            self.canvas.window().gl_swap_window();
 
-            self.canvas.set_draw_color(Color::RED);
-            self.canvas.draw_rect(
-                Rect::new(
-                    point.x,
-                    point.y,
-                    5,
-                    5
-                )
-            ).expect("Failed to draw rectangle!!");
-            self.canvas.present();
+            //self.canvas.set_draw_color(Color::RED);
+            //self.canvas.draw_rect(
+            //    Rect::new(
+            //        point.x,
+            //        point.y,
+            //        5,
+            //        5
+            //    )
+            //).expect("Failed to draw rectangle!!");
+            //self.canvas.present();
         }
         */
     }
