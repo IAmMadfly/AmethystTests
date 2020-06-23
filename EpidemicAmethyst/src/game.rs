@@ -126,4 +126,13 @@ mod map {
             }
         }
     }
+
+    fn load_sprite_sheet(worl: &mut World) {
+
+    }
+
+    fn load_sprite_sheet_helper
+        (world: &mut World, png_path: &str, ron_path: &str) {
+            
+    }
 }
