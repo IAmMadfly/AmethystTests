@@ -3,7 +3,9 @@ use amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage, VecStorage},
     prelude::*,
-    renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+    renderer::{
+        sprite::{SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle},
+        Camera, ImageFormat, Texture},
 };
 
 pub struct GameState;
@@ -39,32 +41,15 @@ impl SimpleState for GameState {
     }
 }
 
-fn Load_map_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
-    
-    let loader = world.read_resource::<Loader>();
-    let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-    let jap_city_texture_handle = loader.load(
-        "../../Map/japanesecitygameassets_windows/RPGMakerVXAce/GK_JC_A5_2.png",
-        ImageFormat::default(),
-        (),
-        &texture_storage
-    );
-    let jap_city_decor_texture_handle = loader.load(
-        "../../Map/japanesecitygameassets_windows/RPGMakerVXAce/GK_JC_B_2.png",
-        ImageFormat::default(),
-        (),
-        &texture_storage
-    );
-
-
-}
-
 mod map {
     use amethyst::{
-        assets::{Asset, Handle},
+        assets::{Asset, AssetStorage, Handle, Loader},
         core::transform::Transform,
+        prelude::*,
         ecs::{VecStorage, prelude::World},
-        renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+        renderer::{
+            sprite::{SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle},
+            Camera, ImageFormat, Texture},
     };
 
     pub struct Property {
@@ -118,21 +103,49 @@ mod map {
             for  obj in layer.objects.iter() {
                 let mut transform = Transform::default();
 
-                transform.set_translation_xyz(
-                    x: f32, 
-                    y: f32, 
-                    z: f32
-                );
+                //transform.set_translation_xyz(
+                //    x: f32, 
+                //    y: f32, 
+                //    z: f32
+                //);
             }
         }
     }
 
-    fn load_sprite_sheet(worl: &mut World) {
+    fn load_sprite_sheet(world: &mut World) {
+        let japan_town_sprite_sheet = load_sprite_sheet_helper(
+            world, 
+            "../../Map/japanesecitygameassets_windows/RPGMakerVXAce/GK_JC_A5_2.png", 
+            "assets/japan_town_map.ron"
+        );
 
+        let japan_city_sprite_sheet = load_sprite_sheet_helper(
+            world, 
+            "../../Map/japanesecitygameassets_windows/RPGMakerVXAce/GK_JC_B_2.png", 
+            "assets/japan_city_map.ron"
+        );
+
+        let osaka_city_sprite_sheet = load_sprite_sheet_helper(
+            world, 
+            "../../Map/osakacitygameassets_windows/Tilemap.png", 
+            "assets/osaka_map.ron"
+        );
     }
 
     fn load_sprite_sheet_helper
-        (world: &mut World, png_path: &str, ron_path: &str) {
-            
+    (world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
+        let texture_handle = {
+            let loader = world.read_resource::<Loader>();
+            let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        };
+
+        let loader = world.read_resource::<Loader>();
+        let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+        loader.load(
+            ron_path,
+            SpriteSheetFormat(texture_handle),
+            (),
+            &sprite_sheet_store
+        )
     }
 }
