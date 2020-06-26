@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="left-down" width="10" height="10" tilewidth="64" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="1">
+ <tileset firstgid="1" name="terrainTiles_default" tilewidth="64" tileheight="64" tilecount="40" columns="10">
+  <image source="terrainTiles_default.png" width="640" height="256"/>
+ </tileset>
+ <tileset firstgid="41" name="Objects" tilewidth="64" tileheight="64" tilecount="18" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="64" height="64" source="Objects/17.png"/>
+  </tile>
+  <tile id="1">
+   <image width="64" height="64" source="Objects/18.png"/>
+  </tile>
+  <tile id="2">
+   <image width="64" height="64" source="Objects/1.png"/>
+  </tile>
+  <tile id="3">
+   <image width="64" height="64" source="Objects/2.png"/>
+  </tile>
+  <tile id="4">
+   <image width="64" height="64" source="Objects/3.png"/>
+  </tile>
+  <tile id="5">
+   <image width="64" height="64" source="Objects/4.png"/>
+  </tile>
+  <tile id="6">
+   <image width="64" height="64" source="Objects/5.png"/>
+  </tile>
+  <tile id="7">
+   <image width="64" height="64" source="Objects/6.png"/>
+  </tile>
+  <tile id="8">
+   <image width="64" height="64" source="Objects/7.png"/>
+  </tile>
+  <tile id="9">
+   <image width="64" height="64" source="Objects/8.png"/>
+  </tile>
+  <tile id="10">
+   <image width="64" height="64" source="Objects/9.png"/>
+  </tile>
+  <tile id="11">
+   <image width="64" height="64" source="Objects/10.png"/>
+  </tile>
+  <tile id="12">
+   <image width="64" height="64" source="Objects/11.png"/>
+  </tile>
+  <tile id="13">
+   <image width="64" height="64" source="Objects/12.png"/>
+  </tile>
+  <tile id="14">
+   <image width="64" height="64" source="Objects/13.png"/>
+  </tile>
+  <tile id="15">
+   <image width="64" height="64" source="Objects/14.png"/>
+  </tile>
+  <tile id="16">
+   <image width="64" height="64" source="Objects/15.png"/>
+  </tile>
+  <tile id="17">
+   <image width="64" height="64" source="Objects/16.png"/>
+  </tile>
+ </tileset>
+ <layer id="1" name="Tile Layer 1" width="10" height="10">
+  <data encoding="csv">
+1,1,11,2,11,11,11,11,1,1,
+1,11,1,2,11,11,11,11,11,1,
+1,11,1,2,1,1,1,11,11,1,
+1,11,11,2,11,1,11,11,11,11,
+1,1,11,4,7,15,11,11,1,11,
+1,1,11,2,16,17,1,1,1,11,
+1,1,11,2,1,11,11,11,11,11,
+1,1,11,2,11,11,1,1,11,11,
+19,19,19,20,19,19,19,19,19,19,
+21,21,31,36,23,23,23,35,21,21
+</data>
+ </layer>
+ <layer id="3" name="Tile Layer 2" width="10" height="10">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,13,0,0,0,
+0,0,0,0,0,0,0,13,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>
