@@ -6,7 +6,9 @@ edition = "2018"
 
 [dependencies]
 amethyst = "0.15.0"
-tiled = "0.9.1"
+base64  = "0.10"
+xml-rs  = "0.8"
+libflate = "0.1.18"
 
 [features]
 default = ["vulkan", "tiles"]
