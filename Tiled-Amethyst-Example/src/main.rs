@@ -2,7 +2,8 @@
 
 extern crate amethyst;
 
-mod lib;
+extern crate tiled;
+//mod lib;
 
 use std::fs::File;
 use std::io::BufReader;
@@ -27,8 +28,8 @@ use amethyst::{
     utils::application_root_dir,
     window::{DisplayConfig, ScreenDimensions, Window},
 };
-use lib::parse;
-
+//use lib::parse;
+use tiled::parse;
 
 pub fn initialize_camera(world: &mut World) -> Entity {
     let (width, height) = {
@@ -102,7 +103,7 @@ fn load_map(world: &mut World) {
 
     let first_tileset = map.tilesets.get(0).expect("No tilesets found!");
     
-    let first_image: &lib::Image = {
+    let first_image: &tiled::Image = {
         let image_vec = &first_tileset.images;
         if image_vec.len() > 0 {
             image_vec.get(0).expect("Failed to get first image in tileset")
@@ -119,6 +120,17 @@ fn load_map(world: &mut World) {
     let tileset_sprite_columns = tileset_width / tile_width as i32;
     let tileset_sprite_rows = tileset_height / tile_height as i32;
 
+    println!("Layers: {}", map.layers.len());
+    for layer in map.layers.iter() {
+        println!("PRINTING LAYER!");
+        for row in layer.tiles.iter() {
+            for tile in row.iter() {
+                print!("{},\t", tile.gid);
+            }
+            println!("");
+        }
+    }
+
     let mut sprite_sheet_handles: HashMap<u32, Handle<SpriteSheet>> = HashMap::new();
     for tileset in map.tilesets.iter() {
         
@@ -130,21 +142,19 @@ fn load_map(world: &mut World) {
             );
             let mut sprites: Vec<Sprite> = Vec::new();
 
-            let tile_width = first_tileset.tile_width as i32;
-            let tile_height = first_tileset.tile_height as i32;
-            let tileset_width = first_image.width;
-            let tileset_height = first_image.height;
-            let tileset_sprite_columns = tileset_width / tile_width as i32;
-            let tileset_sprite_rows = tileset_height / tile_height as i32;
-            for x in 0..tileset_sprite_columns {
-                for y in 0..tileset_sprite_rows {
+            println!(
+                "Columns: {}, Rows: {}", 
+                tileset_sprite_columns, 
+                tileset_sprite_rows
+            );
+            for x in 0..tileset_sprite_rows {
+                for y in 0..tileset_sprite_columns {
                     let tileset_w = *&tileset.images[0].width as u32;
                     let tileset_h = *&tileset.images[0].height as u32;
                     let sprite_w = tile_width as u32;
                     let sprite_h = tile_height as u32;
-                    let offset_x = (y * tile_width) as u32;
-                    let offset_y = (x * tile_height) as u32;
-                    let offsets = [0.0; 2];
+                    let offset_x = (y * tile_width) as u32;//(y * tile_width) as u32;
+                    let offset_y = (x * tile_height) as u32;//(x * tile_height) as u32;
                     // Create a new `Sprite`
                     let sprite = Sprite::from_pixel_values(
                         tileset_w,
@@ -153,7 +163,7 @@ fn load_map(world: &mut World) {
                         sprite_h,
                         offset_x,
                         offset_y,
-                        offsets,
+                        [0.0; 2],
                         false,
                         false
                     );
@@ -189,22 +199,15 @@ fn load_map(world: &mut World) {
                 );
 
                 let mut sprites: Vec<Sprite> = Vec::new();
-                let tileset_w = first_image.width as u32;
-                let tileset_h = first_image.height as u32;
-                let sprite_w = tile_width as u32;
-                let sprite_h = tile_height as u32;
-                let offset_x = 0 as u32;
-                let offset_y = 0 as u32;
-                let offsets = [0.0; 2];
                 // Create a new `Sprite`
                 let sprite = Sprite::from_pixel_values(
-                    tileset_w,
-                    tileset_h,
-                    sprite_w,
-                    sprite_h,
-                    offset_x,
-                    offset_y,
-                    offsets,
+                    image.width as u32,
+                    image.height as u32,
+                    image.width as u32,
+                    image.height as u32,
+                    0,
+                    0,
+                    [0.0; 2],
                     false,
                     false
                 );
@@ -250,7 +253,7 @@ fn load_map(world: &mut World) {
             keys
         };
         for (l, layer) in map.layers.iter().rev().enumerate() {
-            println!("Layer: {}", l);
+            //println!("Layer: {}", l);
             if !layer.visible {
                 continue
             }
@@ -267,24 +270,22 @@ fn load_map(world: &mut World) {
                     let sprite_sheet_hash = {
                         let mut num = sprite_sheet_keys.get(sprite_sheet_keys.len() - 1).expect("Failed to get last element in vec").clone();
                         for sprite_sheet_key in sprite_sheet_keys.iter().rev() {
-                            println!("Curr spt_hash: {}, tile.gid: {}", sprite_sheet_key, tile.gid);
+                            //println!("Curr spt_hash: {}, tile.gid: {}", sprite_sheet_key, tile.gid);
                             if sprite_sheet_key <= &tile.gid {
-                                println!("-- Chosen! --");
+                                //println!("-- Chosen! --");
                                 num = sprite_sheet_key.clone();
                                 break;
                             }
                         }
                         num
                     };
-                    println!("Tile.gid: {}, Sprite hash: {}", tile.gid, sprite_sheet_hash);
+                    println!("Tile.gid (Row: {}, Col: {}, gid: {}), Sprite hash: {}",y, x, tile.gid, sprite_sheet_hash);
 
-                    //println!("Stage 1");
                     // Sprite for the tile
                     let tile_sprite = SpriteRender {
                         sprite_sheet: sprite_sheet_handles.get(&sprite_sheet_hash).expect("Got unexpected hash!").clone(),  //sprite_sheet_handle.clone(),
-                        sprite_number: (tile.gid - 1) as usize,
+                        sprite_number: (tile.gid - sprite_sheet_hash) as usize,
                     };
-                    //println!("Stage 2");
                     
                     // Where we should draw the tile?
                     let mut tile_transform = Transform::default();
@@ -299,7 +300,7 @@ fn load_map(world: &mut World) {
                     tile_transform.set_translation_xyz(
                         offset_x + x_coord as f32,
                         offset_y + y_coord as f32,
-                        1.0
+                        1.0 - (l as f32 * 0.1)
                     );
                     //println!("Stage 4");
                     
