@@ -59,7 +59,11 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for GameplayState {
         initialize_camera(world);
         
         // Load the tiled map the "crude" way
-        load_map(world);
+        let _map = load_map(
+            "resources/assets/tiled_base64_zlib.tmx",
+            "assets",
+            world
+        );
         println!("Finished loading map!");
     }
 
@@ -89,15 +93,15 @@ fn load_texture(path: String, world: &World) -> Handle<Texture>{
     )
 }
 
-fn load_map(world: &mut World) {
+fn load_map(
+    map_path: &str, 
+    image_rel_path: &str, 
+    world: &mut World) -> tiled::Map {
     // Get texture handle for the tileset image
-    let texture_handle = load_texture("assets/terrainTiles_default.png".to_owned(), world);
-
-
-    
+    //let texture_handle = load_texture("assets/terrainTiles_default.png".to_owned(), world);
     
     // Load the tiled map
-    let file = File::open(&Path::new("resources/assets/tiled_base64_zlib.tmx")).unwrap();
+    let file = File::open(&Path::new(map_path)).unwrap();
     let reader = BufReader::new(file);
     let map = parse(reader).unwrap();
 
@@ -120,33 +124,17 @@ fn load_map(world: &mut World) {
     let tileset_sprite_columns = tileset_width / tile_width as i32;
     let tileset_sprite_rows = tileset_height / tile_height as i32;
 
-    println!("Layers: {}", map.layers.len());
-    for layer in map.layers.iter() {
-        println!("PRINTING LAYER!");
-        for row in layer.tiles.iter() {
-            for tile in row.iter() {
-                print!("{},\t", tile.gid);
-            }
-            println!("");
-        }
-    }
-
     let mut sprite_sheet_handles: HashMap<u32, Handle<SpriteSheet>> = HashMap::new();
     for tileset in map.tilesets.iter() {
         
         for image in tileset.images.iter() {
 
             let texture_hand = load_texture(
-                ["assets".to_owned(), image.source.clone()].join("/"), 
+                [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                 world
             );
             let mut sprites: Vec<Sprite> = Vec::new();
 
-            println!(
-                "Columns: {}, Rows: {}", 
-                tileset_sprite_columns, 
-                tileset_sprite_rows
-            );
             for x in 0..tileset_sprite_rows {
                 for y in 0..tileset_sprite_columns {
                     let tileset_w = *&tileset.images[0].width as u32;
@@ -187,14 +175,13 @@ fn load_map(world: &mut World) {
                 tileset.first_gid,
                 sprite_sheet_handle
             );
-            println!("{}: {}", tileset.first_gid, ["assets".to_owned(), image.source.clone()].join("/"));
         }
 
         for tile in tileset.tiles.iter() {
             for image in tile.images.iter() {
 
                 let texture_hand = load_texture(
-                    ["assets".to_owned(), image.source.clone()].join("/"), 
+                    [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                     world
                 );
 
@@ -230,94 +217,86 @@ fn load_map(world: &mut World) {
                     tileset.first_gid + tile.id,
                     sprite_sheet_handle
                 );
-                println!("{}: {}", tileset.first_gid + tile.id, ["assets".to_owned(), image.source.clone()].join("/"));
             }
         }
-    }
-    
-    if let Some(map_tileset) = map.get_tileset_by_gid(1) {
+    }   
         
-        
-        // Loop the row first and then the individual tiles on that row
-        // and then switch to the next row
-        // y = row number
-        // x = column number
-        // IMPORTANT: Bottom left is 0,0 so the tiles list needs to be reversed with .rev()
+    // Loop the row first and then the individual tiles on that row
+    // and then switch to the next row
+    // y = row number
+    // x = column number
+    // IMPORTANT: Bottom left is 0,0 so the tiles list needs to be reversed with .rev()
 
-        let sprite_sheet_keys: Vec<u32> = {
-            let mut keys: Vec<u32> = Vec::new();
-            for sprite_sheet_hash in sprite_sheet_handles.keys() {
-                keys.push(*sprite_sheet_hash);
-            }
-            keys.sort();
-            keys
-        };
-        for (l, layer) in map.layers.iter().rev().enumerate() {
-            //println!("Layer: {}", l);
-            if !layer.visible {
-                continue
-            }
-            for (y, row) in layer.tiles.iter().rev().enumerate().clone() {
-                for (x, &tile) in row.iter().enumerate() {
-                    // Do nothing with empty tiles
-                    if tile.gid == 0 {
-                        continue;
-                    }
-                    //println!("-- Start --");
-                    
-                    // Tile ids start from 1 but tileset sprites start from 0
-                    let tile_id = tile.gid - 1;
-                    let sprite_sheet_hash = {
-                        let mut num = sprite_sheet_keys.get(sprite_sheet_keys.len() - 1).expect("Failed to get last element in vec").clone();
-                        for sprite_sheet_key in sprite_sheet_keys.iter().rev() {
-                            //println!("Curr spt_hash: {}, tile.gid: {}", sprite_sheet_key, tile.gid);
-                            if sprite_sheet_key <= &tile.gid {
-                                //println!("-- Chosen! --");
-                                num = sprite_sheet_key.clone();
-                                break;
-                            }
-                        }
-                        num
-                    };
-                    println!("Tile.gid (Row: {}, Col: {}, gid: {}), Sprite hash: {}",y, x, tile.gid, sprite_sheet_hash);
-
-                    // Sprite for the tile
-                    let tile_sprite = SpriteRender {
-                        sprite_sheet: sprite_sheet_handles.get(&sprite_sheet_hash).expect("Got unexpected hash!").clone(),  //sprite_sheet_handle.clone(),
-                        sprite_number: (tile.gid - sprite_sheet_hash) as usize,
-                    };
-                    
-                    // Where we should draw the tile?
-                    let mut tile_transform = Transform::default();
-                    let x_coord = x * tile_width as usize;
-                    let y_coord = (y as f32 * tile_height as f32) + tile_height as f32;
-                    // Offset the positions by half the tile size so they're nice and snuggly on the screen
-                    // Alternatively could use the Sprite offsets instead: [-32.0, 32.0]. Depends on the use case I guess.
-                    let offset_x = tile_width as f32/2.0;
-                    let offset_y = -tile_height as f32/2.0;
-                    //println!("Stage 3");
-                    
-                    tile_transform.set_translation_xyz(
-                        offset_x + x_coord as f32,
-                        offset_y + y_coord as f32,
-                        1.0 - (l as f32 * 0.1)
-                    );
-                    //println!("Stage 4");
-                    
-                    
-                    // Create the tile entity
-                    world
-                        .create_entity()
-                        .with(tile_transform)
-                        .with(tile_sprite)
-                        .build();
-                    //println!("-- End --");
+    let sprite_sheet_keys: Vec<u32> = {
+        let mut keys: Vec<u32> = Vec::new();
+        for sprite_sheet_hash in sprite_sheet_handles.keys() {
+            keys.push(*sprite_sheet_hash);
+        }
+        keys.sort();
+        keys
+    };
+    for (l, layer) in map.layers.iter().rev().enumerate() {
+        // If the layer is set to invisible, dont render it
+        if !layer.visible {
+            continue
+        }
+        for (y, row) in layer.tiles.iter().rev().enumerate().clone() {
+            for (x, &tile) in row.iter().enumerate() {
+                // Do nothing with empty tiles
+                if tile.gid == 0 {
+                    continue;
                 }
+
+                // Find the sprite_sheet_handle for the right tile.gid.
+                // Due to the way it is organised, we know that if the tile.gid 
+                // is greater or equal to the sprite_sheet_hash key, than that 
+                // is the particular hash key required
+                let sprite_sheet_hash = {
+                    let mut num = sprite_sheet_keys.get(sprite_sheet_keys.len() - 1).expect("Failed to get last element in vec").clone();
+                    for sprite_sheet_key in sprite_sheet_keys.iter().rev() {
+                        if sprite_sheet_key <= &tile.gid {
+                            num = sprite_sheet_key.clone();
+                            break;
+                        }
+                    }
+                    num
+                };
+                
+                // Sprite for the tile
+                let tile_sprite = SpriteRender {
+                    sprite_sheet: sprite_sheet_handles.get(&sprite_sheet_hash).expect("Got unexpected hash!").clone(),  //sprite_sheet_handle.clone(),
+                    sprite_number: (tile.gid - sprite_sheet_hash) as usize,
+                };
+                
+                // Where we should draw the tile?
+                let mut tile_transform = Transform::default();
+                let x_coord = x * tile_width as usize;
+                let y_coord = (y as f32 * tile_height as f32) + tile_height as f32;
+                // Offset the positions by half the tile size so they're nice and snuggly on the screen
+                // Alternatively could use the Sprite offsets instead: [-32.0, 32.0]. Depends on the use case I guess.
+                let offset_x = tile_width as f32/2.0;
+                let offset_y = -tile_height as f32/2.0;
+                //println!("Stage 3");
+                
+                tile_transform.set_translation_xyz(
+                    offset_x + x_coord as f32,
+                    offset_y + y_coord as f32,
+                    1.0 - (l as f32 * 0.1)
+                );
+                //println!("Stage 4");
+                
+                
+                // Create the tile entity
+                world
+                    .create_entity()
+                    .with(tile_transform)
+                    .with(tile_sprite)
+                    .build();
+                //println!("-- End --");
             }
         }
-    } else {
-        println!("Failed to print map!!");
     }
+    map
 }
 
 fn main() -> Result<(), amethyst::Error> {
