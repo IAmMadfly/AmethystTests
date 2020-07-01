@@ -59,9 +59,14 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for GameplayState {
         initialize_camera(world);
         
         // Load the tiled map the "crude" way
-        let _map = load_map(
-            "resources/assets/tiled_base64_zlib.tmx",
-            "assets",
+        //let _map = load_map(
+        //    "resources/assets/tiled_base64_zlib.tmx",
+        //    "assets",
+        //    world
+        //);
+        let map = load_map(
+            "../Map/MainTown.tmx",
+            "../../Map",
             world
         );
         println!("Finished loading map!");
@@ -78,6 +83,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for GameplayState {
 
     fn update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> Trans<GameData<'a, 'b>, StateEvent> {
         data.data.update(&data.world);
+        
         Trans::None
     }
 }
@@ -106,8 +112,10 @@ fn load_map(
     let map = parse(reader).unwrap();
 
     let first_tileset = map.tilesets.get(0).expect("No tilesets found!");
+    let tile_width = first_tileset.tile_width as i32;
+    let tile_height = first_tileset.tile_height as i32;
     
-    let first_image: &tiled::Image = {
+    let _first_image: &tiled::Image = {
         let image_vec = &first_tileset.images;
         if image_vec.len() > 0 {
             image_vec.get(0).expect("Failed to get first image in tileset")
@@ -117,15 +125,29 @@ fn load_map(
         }
     };
 
-    let tile_width = first_tileset.tile_width as i32;
-    let tile_height = first_tileset.tile_height as i32;
-    let tileset_width = first_image.width;
-    let tileset_height = first_image.height;
-    let tileset_sprite_columns = tileset_width / tile_width as i32;
-    let tileset_sprite_rows = tileset_height / tile_height as i32;
-
     let mut sprite_sheet_handles: HashMap<u32, Handle<SpriteSheet>> = HashMap::new();
     for tileset in map.tilesets.iter() {
+
+        // Get first image in tileset
+        let first_image = {
+            if tileset.images.len() > 0 {
+                tileset.images.get(0).expect("Failed to get first image in tileset")
+            } else {
+                tileset.tiles
+                    .get(0)
+                    .expect("Failed to get first tile in tileset")
+                    .images
+                    .get(0)
+                    .expect("Failed to get first image of first tile in tileset")
+            }
+        };
+
+        let tile_width = tileset.tile_width as i32;
+        let tile_height = tileset.tile_height as i32;
+        let tileset_width = first_image.width;
+        let tileset_height = first_image.height;
+        let tileset_sprite_columns = tileset_width / tile_width as i32;
+        let tileset_sprite_rows = tileset_height / tile_height as i32;
         
         for image in tileset.images.iter() {
 
@@ -133,6 +155,7 @@ fn load_map(
                 [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                 world
             );
+            //println!("{}", [image_rel_path.to_owned(), image.source.clone()].join("/"));
             let mut sprites: Vec<Sprite> = Vec::new();
 
             for x in 0..tileset_sprite_rows {
@@ -175,6 +198,10 @@ fn load_map(
                 tileset.first_gid,
                 sprite_sheet_handle
             );
+            //println!(
+            //    "Tileset first_gid:{}, Image: {}", 
+            //    tileset.first_gid, [image_rel_path.to_owned(), image.source.clone()].join("/")
+            //);
         }
 
         for tile in tileset.tiles.iter() {
@@ -184,6 +211,7 @@ fn load_map(
                     [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                     world
                 );
+                //println!("{}", [image_rel_path.to_owned(), image.source.clone()].join("/"));
 
                 let mut sprites: Vec<Sprite> = Vec::new();
                 // Create a new `Sprite`
@@ -217,16 +245,16 @@ fn load_map(
                     tileset.first_gid + tile.id,
                     sprite_sheet_handle
                 );
+                //println!("Tileset first_gid:{}, Image: {}", tileset.first_gid + tile.id, [image_rel_path.to_owned(), image.source.clone()].join("/"));
             }
         }
-    }   
+    }
         
     // Loop the row first and then the individual tiles on that row
     // and then switch to the next row
     // y = row number
     // x = column number
     // IMPORTANT: Bottom left is 0,0 so the tiles list needs to be reversed with .rev()
-
     let sprite_sheet_keys: Vec<u32> = {
         let mut keys: Vec<u32> = Vec::new();
         for sprite_sheet_hash in sprite_sheet_handles.keys() {
@@ -261,6 +289,7 @@ fn load_map(
                     }
                     num
                 };
+                //println!("Tile.gid: {}, Sprite_hash key: {}", tile.gid, sprite_sheet_hash);
                 
                 // Sprite for the tile
                 let tile_sprite = SpriteRender {
