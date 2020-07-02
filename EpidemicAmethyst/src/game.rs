@@ -9,6 +9,10 @@ use amethyst::{
     window::{DisplayConfig, ScreenDimensions, Window}
 };
 
+use crate::systems::{
+    camera::CameraMovementSystem
+};
+
 use std::{
     collections::HashMap,
     io::BufReader,
@@ -37,6 +41,8 @@ impl SimpleState for GameState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
 
         let world = _data.world;
+
+        world.register::<CameraMovementSystem>();
         
         let map = load_map(
             "../Map/MainTown.tmx",

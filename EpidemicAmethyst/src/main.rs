@@ -13,6 +13,12 @@ use amethyst::{
     }
 };
 
+mod systems;
+
+use crate::systems::{
+    camera::CameraMovementSystem
+};
+
 mod game;
 
 fn main() -> amethyst::Result<()> {
@@ -31,6 +37,11 @@ fn main() -> amethyst::Result<()> {
         .expect("Failed to get bindings file!");
 
     let game_data = GameDataBuilder::default()
+        .with(
+            CameraMovementSystem::default(),
+            "camera_movement",
+            &[]
+        )
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
