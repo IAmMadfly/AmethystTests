@@ -80,6 +80,7 @@ fn init_camera(world: &mut World) -> Entity {
         .create_entity()
         .with(cam)
         .with(trans)
+        .named("main_camera")
         .build()
 }
 
