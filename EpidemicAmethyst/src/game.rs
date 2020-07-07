@@ -50,7 +50,11 @@ impl SimpleState for GameState {
             world
         );
 
-        init_camera(world);
+        let mut cam = init_camera(world);
+
+        if let Some(orth_view) = cam.projection_mut().as_orthographic_mut() {
+
+        }
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -64,7 +68,7 @@ impl SimpleState for GameState {
     }
 }
 
-fn init_camera(world: &mut World) -> Entity {
+fn init_camera(world: &mut World) -> Camera {
     let (width, height) = {
         let dimensions = world.read_resource::<ScreenDimensions>();
         (dimensions.width(), dimensions.height())
@@ -78,10 +82,12 @@ fn init_camera(world: &mut World) -> Entity {
 
     world
         .create_entity()
-        .with(cam)
+        .with(cam.clone())
         .with(trans)
         .named("main_camera")
-        .build()
+        .build();
+    
+    cam
 }
 
 fn load_texture(path: String, world: &World) -> Handle<Texture>{
