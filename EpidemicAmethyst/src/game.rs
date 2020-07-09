@@ -23,20 +23,6 @@ use tiled::parse;
 
 pub struct GameState;
 
-struct House {
-    people:         Vec<People>,
-    location:       Point
-}
-
-struct Point {
-    x:              i32,
-    y:              i32
-}
-
-struct People {
-    home:           House
-}
-
 impl SimpleState for GameState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
 
