@@ -1,5 +1,5 @@
 [package]
-name =      "EpidemicAmethyst"
+name =      "epidemic"
 version =   "0.1.0"
 authors =   []
 edition =   "2018"

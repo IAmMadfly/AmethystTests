@@ -7,11 +7,22 @@ use amethyst::{
     window::ScreenDimensions
 };
 
-#[derive(Default)]
 pub struct CameraMovementSystem {
     prev_mouse_pos:         Option<(f32, f32)>,
     camera_center:          [f32; 2],
-    camera_width:           f32                 // Only hal;f width to reduce future calcs
+    camera_width:           f32,                 // Only half width to reduce future calcs
+    camera_width_min:       f32
+}
+
+impl Default for CameraMovementSystem {
+    fn default() -> Self {
+        CameraMovementSystem {
+            prev_mouse_pos:     None,
+            camera_center:      [0.0,0.0],
+            camera_width:       300.0,
+            camera_width_min:   120.0
+        }
+    }
 }
 
 impl Component for CameraMovementSystem {
@@ -46,23 +57,16 @@ impl<'s> System<'s> for CameraMovementSystem {
             self.prev_mouse_pos = None;
         }
 
-        let mut top =       self.camera_center[1] + (self.camera_width);
-        let mut bottom =    self.camera_center[1] - (self.camera_width);
-        let mut left =      self.camera_center[0] - (self.camera_width * screen_dim.aspect_ratio());
-        let mut right =     self.camera_center[0] + (self.camera_width * screen_dim.aspect_ratio());
+        if self.camera_width < self.camera_width_min {
+            self.camera_width = self.camera_width_min;
+        }
 
-        //if (left < -250.0) {
-        //    let diff = -250.0 - left;
-        //    left = left+diff;
-        //    right = right+diff;
-        //}
-        //if bottom < -240.0 {
-        //    let diff = -240.0 - bottom;
-        //    top = top + diff;
-        //    bottom = bottom + diff;
-        //}
+        let top =       self.camera_center[1] + (self.camera_width);
+        let bottom =    self.camera_center[1] - (self.camera_width);
+        let left =      self.camera_center[0] - (self.camera_width * screen_dim.aspect_ratio());
+        let right =     self.camera_center[0] + (self.camera_width * screen_dim.aspect_ratio());
 
-        for (camera, transform) in (&mut camera, &mut transforms).join() {
+        for (camera, _transform) in (&mut camera, &mut transforms).join() {
 
             if let Some(ortho_view) = camera.projection_mut().as_orthographic_mut() {
                 ortho_view.set_bottom_and_top(
@@ -74,13 +78,13 @@ impl<'s> System<'s> for CameraMovementSystem {
                     right
                 );
 
-                println!(
-                    "top: {}, Right: {}, Bottom: {}, Left: {}", 
-                    ortho_view.top(),
-                    ortho_view.right(),
-                    ortho_view.bottom(),
-                    ortho_view.left()
-                );
+                //println!(
+                //    "top: {}, Right: {}, Bottom: {}, Left: {}", 
+                //    ortho_view.top(),
+                //    ortho_view.right(),
+                //    ortho_view.bottom(),
+                //    ortho_view.left()
+                //);
             }
         }
     }

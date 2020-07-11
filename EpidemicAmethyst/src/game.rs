@@ -30,17 +30,19 @@ impl SimpleState for GameState {
 
         world.register::<CameraMovementSystem>();
         
-        let map = load_map(
+        let _map = load_map(
             "../Map/MainTown.tmx",
             "../../Map",
             world
         );
 
-        let mut cam = init_camera(world);
+        let _cam = init_camera(world);
 
-        if let Some(orth_view) = cam.projection_mut().as_orthographic_mut() {
+        //if let Some(orth_view) = cam.projection_mut().as_orthographic_mut() {
+        //}
 
-        }
+
+
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
