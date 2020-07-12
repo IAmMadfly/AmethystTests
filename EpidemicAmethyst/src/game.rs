@@ -36,12 +36,9 @@ impl SimpleState for GameState {
             world
         );
 
+        
+
         let _cam = init_camera(world);
-
-        //if let Some(orth_view) = cam.projection_mut().as_orthographic_mut() {
-        //}
-
-
 
     }
 
@@ -279,11 +276,12 @@ fn load_map(
                     }
                     num
                 };
-                //println!("Tile.gid: {}, Sprite_hash key: {}", tile.gid, sprite_sheet_hash);
                 
                 // Sprite for the tile
                 let tile_sprite = SpriteRender {
-                    sprite_sheet: sprite_sheet_handles.get(&sprite_sheet_hash).expect("Got unexpected hash!").clone(),  //sprite_sheet_handle.clone(),
+                    sprite_sheet: sprite_sheet_handles
+                        .get(&sprite_sheet_hash)
+                        .expect("Got unexpected hash!").clone(),
                     sprite_number: (tile.gid - sprite_sheet_hash) as usize,
                 };
                 
@@ -295,15 +293,18 @@ fn load_map(
                 // Alternatively could use the Sprite offsets instead: [-32.0, 32.0]. Depends on the use case I guess.
                 let offset_x = tile_width as f32/2.0;
                 let offset_y = -tile_height as f32/2.0;
-                //println!("Stage 3");
+
+                println!(
+                    "Tile\tx pos: {},\ty pos: {}", 
+                    offset_x + x_coord as f32, 
+                    offset_y + y_coord as f32
+                );
                 
                 tile_transform.set_translation_xyz(
                     offset_x + x_coord as f32,
                     offset_y + y_coord as f32,
                     1.0 - (l as f32 * 0.1)
                 );
-                //println!("Stage 4");
-                
                 
                 // Create the tile entity
                 world
@@ -311,7 +312,6 @@ fn load_map(
                     .with(tile_transform)
                     .with(tile_sprite)
                     .build();
-                //println!("-- End --");
             }
         }
     }
