@@ -38,13 +38,15 @@ impl<'s> System<'s> for CameraMovementSystem {
     );
 
     fn run(&mut self, (mut camera, mut transforms, input_handler, screen_dim): Self::SystemData) {
+        let mouse_pos = input_handler.mouse_position();
+        
         // Change width value
         self.camera_width = self.camera_width + input_handler.mouse_wheel_value(false) * 5.0;
             
         // Change camera position
         if input_handler.mouse_button_is_down(winit::MouseButton::Left) {
             if let Some(prev_mouse_pos) = self.prev_mouse_pos {
-                if let Some(curr_mouse_pos) = input_handler.mouse_position() {
+                if let Some(curr_mouse_pos) = mouse_pos {
                     let (pre_x, pre_y) = prev_mouse_pos;
                     let (cur_x, cur_y) = curr_mouse_pos;
 
@@ -52,7 +54,7 @@ impl<'s> System<'s> for CameraMovementSystem {
                     self.camera_center[1] = self.camera_center[1] - (cur_y - pre_y);
                 }
             }
-            self.prev_mouse_pos = input_handler.mouse_position();
+            self.prev_mouse_pos = mouse_pos;
         } else {
             self.prev_mouse_pos = None;
         }
