@@ -1,12 +1,11 @@
 use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::transform::Transform,
-    ecs::prelude::{Entity},
     prelude::*,
     renderer::{
-        sprite::{SpriteRender, Sprite, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle},
+        sprite::{SpriteRender, Sprite, SpriteSheet},
         Camera, ImageFormat, Texture},
-    window::{DisplayConfig, ScreenDimensions, Window}
+    window::{ScreenDimensions}
 };
 
 use crate::systems::{
@@ -42,7 +41,7 @@ impl SimpleState for GameState {
 
     }
 
-    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, _event: StateEvent) -> SimpleTrans {
         //println!("Handling event!");
         Trans::None
     }
@@ -294,11 +293,11 @@ fn load_map(
                 let offset_x = tile_width as f32/2.0;
                 let offset_y = -tile_height as f32/2.0;
 
-                println!(
-                    "Tile\tx pos: {},\ty pos: {}", 
-                    offset_x + x_coord as f32, 
-                    offset_y + y_coord as f32
-                );
+                //println!(
+                //    "Tile\tx pos: {},\ty pos: {}", 
+                //    offset_x + x_coord as f32, 
+                //    offset_y + y_coord as f32
+                //);
                 
                 tile_transform.set_translation_xyz(
                     offset_x + x_coord as f32,

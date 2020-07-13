@@ -14,12 +14,7 @@ use amethyst::{
 };
 
 mod systems;
-
-use crate::systems::{
-    camera::CameraMovementSystem
-};
-
-mod game;
+mod states;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -38,7 +33,7 @@ fn main() -> amethyst::Result<()> {
 
     let game_data = GameDataBuilder::default()
         .with(
-            CameraMovementSystem::default(),
+            systems::camera::CameraMovementSystem::default(),
             "camera_movement",
             &[]
         )
@@ -53,7 +48,11 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(input_bundle).expect("Failed to bind input bundle")
         .with_bundle(TransformBundle::new())?;
 
-    let mut game = Application::new(assets_dir, game::GameState, game_data)?;
+    let mut game = Application::new(
+        assets_dir, 
+        states::game::GameState, 
+        game_data
+    )?;
     game.run();
 
     Ok(())

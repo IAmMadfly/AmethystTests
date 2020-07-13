@@ -1,7 +1,7 @@
 use amethyst::{
     winit,
     core::{Transform},
-    ecs::{Component, Join, Read, ReadExpect, ReadStorage, System, VecStorage, SystemData, World, WriteStorage},
+    ecs::{Component, Join, Read, ReadExpect, System, VecStorage, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::camera::Camera,
     window::ScreenDimensions
