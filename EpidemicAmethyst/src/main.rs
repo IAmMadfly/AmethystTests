@@ -50,7 +50,7 @@ fn main() -> amethyst::Result<()> {
 
     let mut game = Application::new(
         assets_dir, 
-        states::game::GameState, 
+        states::welcome::WelcomeState::default(), 
         game_data
     )?;
     game.run();
