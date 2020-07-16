@@ -1,13 +1,7 @@
 use amethyst::{
-    assets::{AssetStorage, Loader, Handle},
-    core::transform::Transform,
     ecs::prelude::Entity,
     prelude::*,
-    ui::UiCreator,
-    renderer::{
-        sprite::{SpriteRender, Sprite, SpriteSheet},
-        Camera, ImageFormat, Texture},
-    window::{ScreenDimensions}
+    ui::UiCreator
 };
 
 #[derive(Default, Debug)]
@@ -30,7 +24,7 @@ impl SimpleState for WelcomeState {
         _data: StateData<'_, GameData<'_, '_>>, 
         _event: StateEvent
     ) -> SimpleTrans {
-        let world = _data.world;
+        let _world = _data.world;
 
         Trans::None
     }
