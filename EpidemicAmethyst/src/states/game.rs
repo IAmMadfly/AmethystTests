@@ -2,10 +2,12 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::transform::Transform,
     prelude::*,
+    input,
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
         Camera, ImageFormat, Texture},
-    window::{ScreenDimensions}
+    window::{ScreenDimensions},
+    winit::VirtualKeyCode
 };
 
 use crate::systems::{
@@ -22,9 +24,16 @@ use tiled::parse;
 
 pub struct GameState;
 
+impl Default for GameState {
+    fn default() -> Self {
+        println!("Getting default GameState");
+        GameState{}
+    }
+}
+
 impl SimpleState for GameState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
-
+        println!("Game is starting!!");
         let world = _data.world;
 
         world.register::<CameraMovementSystem>();
@@ -35,15 +44,21 @@ impl SimpleState for GameState {
             world
         );
 
-        
-
         let _cam = init_camera(world);
-
     }
 
-    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, _event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
         //println!("Handling event!");
-        Trans::None
+        match &event {
+            StateEvent::Window(windowEvent) => {
+                if input::is_key_down(&windowEvent, VirtualKeyCode::Escape) {
+                    Trans::Quit
+                } else {
+                    Trans::None
+                }
+            },
+            _ => Trans::None
+        }
     }
 
     fn update(&mut self, _: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {

@@ -4,6 +4,7 @@ use amethyst::{
     ui::{UiCreator, UiButtonBuilder, UiButton}
 };
 
+
 #[derive(Default, Debug)]
 pub struct WelcomeState {
     ui_handle:  Option<Entity>
@@ -12,11 +13,7 @@ pub struct WelcomeState {
 impl SimpleState for WelcomeState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
         let world = _data.world;
-
-        //let (id, start_butt): (u32, UiButton) = UiButtonBuilder::<(), u32>::new("Start")
-        //                    .build_from_world(&world);
-
-        //println!("Loading world!");
+        
         self.ui_handle =
             Some(world.exec(|mut creator: UiCreator<'_>| creator.create("ui/welcome.ron", ())));
         println!("Finished loading world! Is ui loaded? {}", self.ui_handle.is_some());

@@ -10,7 +10,8 @@ use amethyst::{
     input::{
         InputBundle,
         StringBindings
-    }
+    },
+    ui::{RenderUi, UiBundle}
 };
 
 mod systems;
@@ -24,12 +25,12 @@ fn main() -> amethyst::Result<()> {
     let assets_dir =    app_root.join("assets");
     let config_dir =    app_root.join("config");
     let display_config_path = config_dir.join("display.ron");
-    let binding_config_path = app_root.join("config").join("bindings.ron");
+    //let binding_config_path = app_root.join("config").join("bindings.ron");
 
     // Insert bundles
-    let input_bundle = InputBundle::<StringBindings>::new()
-        .with_bindings_from_file(binding_config_path)
-        .expect("Failed to get bindings file!");
+    //let input_bundle = InputBundle::<StringBindings>::new()
+    //    .with_bindings_from_file(binding_config_path)
+    //    .expect("Failed to get bindings file!");
 
     let game_data = GameDataBuilder::default()
         .with(
@@ -41,18 +42,22 @@ fn main() -> amethyst::Result<()> {
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
                     RenderToWindow::from_config_path(display_config_path)?
-                        .with_clear([0.34, 0.36, 0.52, 1.0]),
+                        .with_clear([0.005, 0.005, 0.005, 1.0]),
                 )
-                .with_plugin(RenderFlat2D::default()),
+                .with_plugin(RenderFlat2D::default())
+                .with_plugin(RenderUi::default())
         )?
-        .with_bundle(input_bundle).expect("Failed to bind input bundle")
-        .with_bundle(TransformBundle::new())?;
+        .with_bundle(InputBundle::<StringBindings>::new())?
+        //.with_bundle(input_bundle)?
+        .with_bundle(TransformBundle::new())?
+        .with_bundle(UiBundle::<StringBindings>::new())?;
 
     let mut game = Application::new(
         assets_dir, 
+        //states::game::GameState::default(),
         states::welcome::WelcomeState::default(), 
         game_data
-    )?;
+    ).expect("Failed to create new Game application");
     game.run();
 
     Ok(())
