@@ -22,13 +22,20 @@ use std::{
     };
 use tiled::parse;
 
-pub struct GameState;
+#[derive(Debug)]
+pub struct GameState {
+    loaded:     bool
+}
 
 impl Default for GameState {
     fn default() -> Self {
-        println!("Getting default GameState");
-        GameState{}
+        GameState{
+            loaded:     false
+        }
     }
+}
+
+impl GameState {
 }
 
 impl SimpleState for GameState {
@@ -37,12 +44,6 @@ impl SimpleState for GameState {
         let world = _data.world;
 
         world.register::<CameraMovementSystem>();
-        
-        let _map = load_map(
-            "../Map/MainTown.tmx",
-            "../../Map",
-            world
-        );
 
         let _cam = init_camera(world);
     }
@@ -330,4 +331,12 @@ fn load_map(
         }
     }
     map
+}
+
+pub fn load_game_map(world: &mut World) {
+    load_map(
+        "../Map/MainTown.tmx",
+        "../../Map",
+        world
+    );
 }

@@ -20,7 +20,8 @@ impl SimpleState for WelcomeState {
         
         self.ui_handle =
             Some(world.exec(|mut creator: UiCreator<'_>| creator.create("ui/welcome.ron", ())));
-        println!("Finished loading world! Is ui loaded? {}", self.ui_handle.is_some());
+        
+        game::load_game_map(world);
     }
 
     fn update(&mut self, state_data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
