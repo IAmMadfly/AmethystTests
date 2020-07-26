@@ -7,9 +7,12 @@ use amethyst::{
 };
 
 use crate::states::game;
+use crate::states::passer;
+use std::thread;
 
 #[derive(Default, Debug)]
 pub struct WelcomeState {
+    game_loader:    passer::Passer<game::GameState>,  
     ui_handle:      Option<Entity>,
     start_butt:     Option<Entity>
 }
@@ -21,7 +24,13 @@ impl SimpleState for WelcomeState {
         self.ui_handle =
             Some(world.exec(|mut creator: UiCreator<'_>| creator.create("ui/welcome.ron", ())));
         
-        game::load_game_map(world);
+        //game::load_game_map(world);
+
+        self.game_loader = passer::Passer::new(game::GameState::default());
+        
+        if let Some(loader) = &self.game_loader.item {
+            loader.borrow_mut().load_map(world);
+        }
     }
 
     fn update(&mut self, state_data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
@@ -57,7 +66,13 @@ impl SimpleState for WelcomeState {
             }) => {
                 if Some(target) == self.start_butt {
                     println!("Starting game!!");
-                    return Trans::Switch(Box::new(game::GameState::default()))
+                    return Trans::Switch(
+                        Box::new(
+                            self.game_loader
+                                .return_val("Error getting game from RefCell")
+                                .expect("Failed to get preloaded game from option")
+                        )
+                    )
                 }
                 Trans::None
             }
