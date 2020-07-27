@@ -10,11 +10,21 @@ use crate::states::game;
 use crate::states::passer;
 use std::thread;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct WelcomeState {
-    game_loader:    passer::Passer<game::GameState>,  
+    game_loader:    passer::Passer<game::GameState>,
     ui_handle:      Option<Entity>,
     start_butt:     Option<Entity>
+}
+
+impl Default for WelcomeState {
+    fn default() -> Self {
+        WelcomeState {
+            game_loader:    passer::Passer::new(game::GameState::default()),
+            ui_handle:      None,
+            start_butt:     None
+        }
+    }
 }
 
 impl SimpleState for WelcomeState {
@@ -25,11 +35,12 @@ impl SimpleState for WelcomeState {
             Some(world.exec(|mut creator: UiCreator<'_>| creator.create("ui/welcome.ron", ())));
         
         //game::load_game_map(world);
-
-        self.game_loader = passer::Passer::new(game::GameState::default());
-        
         if let Some(loader) = &self.game_loader.item {
             loader.borrow_mut().load_map(world);
+        } else {
+            let game_state = game::GameState::default();
+            game_state.load_map(world);
+            self.game_loader = passer::Passer::new(game_state);
         }
     }
 

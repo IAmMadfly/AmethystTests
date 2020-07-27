@@ -10,10 +10,6 @@ use amethyst::{
     winit::VirtualKeyCode
 };
 
-use crate::systems::{
-    camera::CameraMovementSystem
-};
-
 use std::{
     collections::HashMap,
     io::BufReader,
@@ -21,6 +17,8 @@ use std::{
     fs::File
     };
 use tiled::parse;
+
+use crate::states::pause;
 
 #[derive(Debug)]
 pub struct GameState {}
@@ -56,9 +54,10 @@ impl SimpleState for GameState {
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
         //println!("Handling event!");
         match &event {
-            StateEvent::Window(windowEvent) => {
-                if input::is_key_down(&windowEvent, VirtualKeyCode::Escape) {
-                    Trans::Quit
+            StateEvent::Window(window_event) => {
+                if input::is_key_down(&window_event, VirtualKeyCode::Escape) {
+                    Trans::Push(Box::new(pause::PauseState::default()))
+                    //Trans::Quit
                 } else {
                     Trans::None
                 }

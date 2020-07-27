@@ -41,7 +41,7 @@ impl<'s> System<'s> for CameraMovementSystem {
         let mouse_pos = input_handler.mouse_position();
         
         // Change width value
-        self.camera_width = self.camera_width + input_handler.mouse_wheel_value(false) * 5.0;
+        self.camera_width = self.camera_width + input_handler.mouse_wheel_value(false) * -10.0;
             
         // Change camera position
         if input_handler.mouse_button_is_down(winit::MouseButton::Left) {
