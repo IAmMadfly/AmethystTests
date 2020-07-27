@@ -7,7 +7,7 @@ use amethyst::{
 };
 
 use crate::states::game;
-use crate::states::passer;
+use crate::tools::passer;
 use std::thread;
 
 #[derive(Debug)]
@@ -36,10 +36,10 @@ impl SimpleState for WelcomeState {
         
         //game::load_game_map(world);
         if let Some(loader) = &self.game_loader.item {
-            loader.borrow_mut().load_map(world);
+            loader.borrow_mut().load_game_map(world);
         } else {
-            let game_state = game::GameState::default();
-            game_state.load_map(world);
+            let mut game_state = game::GameState::default();
+            game_state.load_game_map(world);
             self.game_loader = passer::Passer::new(game_state);
         }
     }
