@@ -6,11 +6,15 @@ use amethyst::{
     winit::VirtualKeyCode
 };
 
-pub struct PauseState {}
+pub struct PauseState {
+    ui_handle:      Option<Entity>
+}
 
 impl Default for PauseState {
     fn default() -> Self {
-        PauseState{}
+        PauseState{
+            ui_handle:      None
+        }
     }
 }
 
