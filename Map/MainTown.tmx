@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="3">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="70">
  <tileset firstgid="1" name="OsakaCity" tilewidth="32" tileheight="32" tilecount="357" columns="17">
   <image source="osakacitygameassets_windows/Tilemap/Tilemap.png" width="544" height="672"/>
  </tileset>
@@ -63,9 +63,9 @@
  <layer id="1" name="Houses" width="50" height="50">
   <data encoding="csv">
 19,20,22,23,24,25,26,701,702,703,704,19,14,20,22,23,24,25,26,701,702,703,703,704,0,19,14,20,2,19,14,20,19,14,14,20,0,0,19,20,22,23,24,25,26,701,702,703,703,704,
-36,37,39,40,41,42,43,717,718,719,720,36,31,37,39,40,42,40,43,717,718,735,719,720,0,36,31,37,16,36,37,67,36,31,31,37,0,0,36,37,39,40,42,40,43,717,718,735,719,720,
-53,54,56,57,58,59,60,733,734,735,736,53,5,54,56,57,58,59,60,733,734,735,735,736,0,53,5,54,71,53,5,50,53,5,5,54,0,0,53,54,56,57,58,59,60,733,734,735,735,736,
-70,71,73,74,75,76,77,749,750,751,752,70,3,71,73,74,75,76,77,749,750,751,751,752,0,70,70,71,89,70,71,50,70,70,70,71,0,0,70,71,73,74,75,76,77,749,750,751,751,752,
+36,37,39,40,41,42,43,717,718,719,720,36,31,37,39,40,42,40,43,717,718,735,719,720,0,36,31,37,67,36,37,67,36,31,31,37,0,0,36,37,39,40,42,40,43,717,718,735,719,720,
+53,54,56,57,58,59,60,733,734,735,736,53,5,54,56,57,58,59,60,733,734,735,735,736,0,53,5,54,50,53,5,50,53,5,5,54,0,0,53,54,56,57,58,59,60,733,734,735,735,736,
+70,71,73,74,75,76,77,749,750,751,752,70,3,71,73,74,75,76,77,749,750,751,751,752,0,70,70,71,50,70,71,50,70,70,70,71,0,0,70,71,73,74,75,76,77,749,750,751,751,752,
 87,88,90,93,92,93,94,765,766,767,768,87,87,88,90,91,92,93,94,765,763,767,767,768,0,87,87,88,116,87,88,169,87,87,87,88,0,0,87,88,90,91,92,93,94,765,763,767,767,768,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,21,0,0,0,0,0,0,
@@ -117,11 +117,11 @@
  <layer id="3" name="Decor" width="50" height="50">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,175,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,192,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,204,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,202,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,202,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,193,123,0,0,0,0,0,0,0,0,0,0,123,193,0,0,0,0,0,0,0,0,0,0,0,202,0,0,253,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,140,159,0,0,0,159,0,0,0,0,0,140,159,0,795,0,159,0,0,0,0,0,0,0,0,0,0,159,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,192,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,193,123,0,0,0,0,0,0,0,0,0,0,123,193,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,140,159,0,0,0,159,0,0,0,0,0,140,159,0,795,0,159,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,139,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -168,4 +168,179 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="6" name="Apartments">
+  <properties>
+   <property name="peopleCount" type="int" value="0"/>
+  </properties>
+  <object id="4" x="0.5" y="1.5" width="61" height="156.5">
+   <properties>
+    <property name="peopleCount" type="int" value="16"/>
+   </properties>
+  </object>
+  <object id="6" x="353.5" y="1.5" width="92" height="157">
+   <properties>
+    <property name="peopleCount" type="int" value="18"/>
+   </properties>
+  </object>
+  <object id="7" x="801.5" y="1.5" width="126" height="157">
+   <properties>
+    <property name="peopleCount" type="int" value="24"/>
+   </properties>
+  </object>
+  <object id="8" x="930" y="2" width="94" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="36"/>
+   </properties>
+  </object>
+  <object id="9" x="1025.5" y="1.5" width="125.5" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="47"/>
+   </properties>
+  </object>
+  <object id="10" x="1217" y="1" width="62.5" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="15"/>
+   </properties>
+  </object>
+  <object id="12" x="961.5" y="257.5" width="93" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="28"/>
+   </properties>
+  </object>
+  <object id="13" x="1345" y="193.5" width="29" height="221.5">
+   <properties>
+    <property name="peopleCount" type="int" value="14"/>
+   </properties>
+  </object>
+  <object id="14" x="1377.5" y="193.5" width="29" height="221.5">
+   <properties>
+    <property name="peopleCount" type="int" value="13"/>
+   </properties>
+  </object>
+  <object id="16" x="1345" y="545.5" width="94" height="157.5">
+   <properties>
+    <property name="peopleCount" type="int" value="32"/>
+   </properties>
+  </object>
+  <object id="17" x="929" y="481.5" width="30.5" height="221.5">
+   <properties>
+    <property name="peopleCount" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="18" x="449" y="545.5" width="93.5" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="30"/>
+   </properties>
+  </object>
+  <object id="19" x="97" y="546" width="61" height="156.5">
+   <properties>
+    <property name="peopleCount" type="int" value="15"/>
+   </properties>
+  </object>
+  <object id="20" x="1" y="545.5" width="60.5" height="157.5">
+   <properties>
+    <property name="peopleCount" type="int" value="14"/>
+   </properties>
+  </object>
+  <object id="21" x="1345.5" y="737.5" width="28" height="221.5">
+   <properties>
+    <property name="peopleCount" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="22" x="801" y="801.5" width="94.5" height="159">
+   <properties>
+    <property name="peopleCount" type="int" value="27"/>
+   </properties>
+  </object>
+  <object id="23" x="321" y="1057" width="62" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="8"/>
+   </properties>
+  </object>
+  <object id="24" x="385" y="1057.5" width="61.5" height="157.5">
+   <properties>
+    <property name="peopleCount" type="int" value="11"/>
+   </properties>
+  </object>
+  <object id="25" x="449.5" y="1058" width="61.5" height="157.5">
+   <properties>
+    <property name="peopleCount" type="int" value="8"/>
+   </properties>
+  </object>
+  <object id="26" x="513.5" y="1025" width="61" height="190.5">
+   <properties>
+    <property name="peopleCount" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="27" x="737" y="1057.5" width="93.5" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="23"/>
+   </properties>
+  </object>
+  <object id="28" x="1505" y="1057.5" width="94" height="158.5">
+   <properties>
+    <property name="peopleCount" type="int" value="28"/>
+   </properties>
+  </object>
+  <object id="29" x="225" y="1313" width="62.5" height="158.5">
+   <properties>
+    <property name="peopleCount" type="int" value="15"/>
+   </properties>
+  </object>
+  <object id="30" x="289" y="1313.5" width="94" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="18"/>
+   </properties>
+  </object>
+  <object id="31" x="865" y="1313.5" width="95" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="23"/>
+   </properties>
+  </object>
+  <object id="32" x="1345" y="1313.5" width="93.5" height="158">
+   <properties>
+    <property name="peopleCount" type="int" value="20"/>
+   </properties>
+  </object>
+  <object id="33" x="1441.5" y="1313.5" width="93" height="157.5">
+   <properties>
+    <property name="peopleCount" type="int" value="24"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="WorkPlaces">
+  <object id="34" x="65.3333" y="2" width="145.333" height="156"/>
+  <object id="35" x="226" y="1.33333" width="124.667" height="156.667"/>
+  <object id="36" x="448.667" y="1.33333" width="145.333" height="159.333"/>
+  <object id="37" x="608.667" y="2" width="158.667" height="156.667"/>
+  <object id="38" x="1281.33" y="2" width="145.333" height="158"/>
+  <object id="39" x="1440" y="1.33333" width="158.667" height="156"/>
+  <object id="40" x="1409.33" y="258" width="145.333" height="159.333"/>
+  <object id="41" x="1089.33" y="256.667" width="144.667" height="158.667"/>
+  <object id="42" x="1440.67" y="512.667" width="159.333" height="190.667"/>
+  <object id="44" x="1088" y="556" width="224" height="148.667"/>
+  <object id="45" x="802" y="226" width="156.667" height="188.667"/>
+  <object id="46" x="768" y="513.333" width="158.667" height="189.333"/>
+  <object id="47" x="544.667" y="268.667" width="222" height="148.667"/>
+  <object id="48" x="609.333" y="544.667" width="144.667" height="158.667"/>
+  <object id="50" x="161.333" y="257.333" width="242" height="157.333"/>
+  <object id="51" x="0.666667" y="225.333" width="126.667" height="190.667"/>
+  <object id="52" x="64.5" y="546" width="30" height="157"/>
+  <object id="53" x="160.5" y="546" width="146" height="157"/>
+  <object id="54" x="321" y="513.5" width="125.5" height="190.5"/>
+  <object id="55" x="1376.5" y="801.5" width="146.5" height="159"/>
+  <object id="56" x="961" y="812" width="222.5" height="147"/>
+  <object id="57" x="544.5" y="812.5" width="224" height="146.5"/>
+  <object id="59" x="160.5" y="801" width="244.5" height="158.5"/>
+  <object id="60" x="1" y="769" width="127" height="190.5"/>
+  <object id="61" x="1" y="1057" width="146" height="157"/>
+  <object id="62" x="608.5" y="1025" width="126.5" height="190"/>
+  <object id="63" x="864.5" y="1068.5" width="223" height="146.5"/>
+  <object id="64" x="1089" y="1024.5" width="127.5" height="190.5"/>
+  <object id="65" x="1344.5" y="1025.5" width="159.5" height="190"/>
+  <object id="66" x="961.5" y="1314" width="242" height="158.5"/>
+  <object id="67" x="641" y="1324.5" width="223" height="148"/>
+  <object id="68" x="512" y="1279.5" width="126.5" height="192.5"/>
+  <object id="69" x="0" y="1313" width="179.5" height="159"/>
+ </objectgroup>
 </map>
