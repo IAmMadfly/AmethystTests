@@ -21,6 +21,16 @@ use tiled::parse;
 
 use crate::states::pause;
 
+
+pub struct AnimatedSprite {
+
+}
+
+
+
+
+
+
 #[derive(Debug)]
 pub struct GameState {
     map:            Option<tiled::Map>,
@@ -82,7 +92,6 @@ impl GameState {
         image_rel_path: &str, 
         world: &mut World) {
         // Get texture handle for the tileset image
-        //let texture_handle = load_texture("assets/terrainTiles_default.png".to_owned(), world);
         
         // Load the tiled map
         let file = File::open(&Path::new(map_path)).unwrap();
@@ -133,7 +142,6 @@ impl GameState {
                     [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                     world
                 );
-                //println!("{}", [image_rel_path.to_owned(), image.source.clone()].join("/"));
                 let mut sprites: Vec<Sprite> = Vec::new();
     
                 for x in 0..tileset_sprite_rows {
@@ -176,10 +184,6 @@ impl GameState {
                     tileset.first_gid,
                     sprite_sheet_handle
                 );
-                //println!(
-                //    "Tileset first_gid:{}, Image: {}", 
-                //    tileset.first_gid, [image_rel_path.to_owned(), image.source.clone()].join("/")
-                //);
             }
     
             for tile in tileset.tiles.iter() {
@@ -189,7 +193,6 @@ impl GameState {
                         [image_rel_path.to_owned(), image.source.clone()].join("/"), 
                         world
                     );
-                    //println!("{}", [image_rel_path.to_owned(), image.source.clone()].join("/"));
     
                     let mut sprites: Vec<Sprite> = Vec::new();
                     // Create a new `Sprite`
@@ -223,7 +226,6 @@ impl GameState {
                         tileset.first_gid + tile.id,
                         sprite_sheet_handle
                     );
-                    //println!("Tileset first_gid:{}, Image: {}", tileset.first_gid + tile.id, [image_rel_path.to_owned(), image.source.clone()].join("/"));
                 }
             }
         }
@@ -297,23 +299,29 @@ impl GameState {
                         1.0 - (l as f32 * 0.1)
                     );
 
-                    tile_transform.set_rotation_euler(std::f32::consts::PI/2.0, std::f32::consts::PI/2.0, 0.0);
-                    //tile_transform.set_rotation_2d(45.0);
-                    //let mut x_axis_transform: bool =    false;
-                    //let mut y_axis_transform: bool =    false;
-                    //if tile.flip_h {
-                    //    y_axis_transform = !y_axis_transform;
-                    //}
-                    //if tile.flip_v {
-                    //    x_axis_transform = !x_axis_transform;
-                    //}
-                    //if tile.flip_d {
-                    //    x_axis_transform = !x_axis_transform;
-                    //    y_axis_transform = !y_axis_transform;
-                    //}
-
-
-                    //std::f32::consts::PI;
+                    if tile.flip_v {
+                        tile_transform.append_rotation_x_axis(
+                            std::f32::consts::PI
+                        );
+                    }
+                    if tile.flip_h {
+                        tile_transform.append_rotation_y_axis(
+                            std::f32::consts::PI
+                        );
+                    }
+                    if tile.flip_d {
+                        tile_transform.set_rotation_z_axis(
+                            std::f32::consts::PI/2.0
+                        );
+                        if !tile.flip_v && tile.flip_h {
+                            tile_transform.append_rotation_y_axis(
+                                std::f32::consts::PI
+                            );
+                            tile_transform.append_rotation_x_axis(
+                                std::f32::consts::PI
+                            );
+                        }
+                    }
                     
                     // Create the tile entity
                     world
