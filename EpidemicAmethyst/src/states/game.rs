@@ -36,6 +36,37 @@ impl Default for GameState {
     }
 }
 
+impl SimpleState for GameState {
+    fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
+        println!("Game is starting!!");
+        let world = _data.world;
+
+        //world.register::<CameraMovementSystem>();
+
+        let _cam = init_camera(world);
+    }
+
+    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+        //println!("Handling event!");
+        match &event {
+            StateEvent::Window(window_event) => {
+                if input::is_key_down(&window_event, VirtualKeyCode::Escape) {
+                    Trans::Push(Box::new(pause::PauseState::default()))
+                    //Trans::Quit
+                } else {
+                    Trans::None
+                }
+            },
+            _ => Trans::None
+        }
+    }
+
+    fn update(&mut self, _: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        //println!("Updating GameState!");
+        Trans::None
+    }
+}
+
 impl GameState {
     pub fn load_game_map(&mut self, world: &mut World) {
         self.load_map(
@@ -265,6 +296,24 @@ impl GameState {
                         offset_y + y_coord as f32,
                         1.0 - (l as f32 * 0.1)
                     );
+
+                    tile_transform.set_rotation_euler(std::f32::consts::PI/2.0, std::f32::consts::PI/2.0, 0.0);
+                    //tile_transform.set_rotation_2d(45.0);
+                    //let mut x_axis_transform: bool =    false;
+                    //let mut y_axis_transform: bool =    false;
+                    //if tile.flip_h {
+                    //    y_axis_transform = !y_axis_transform;
+                    //}
+                    //if tile.flip_v {
+                    //    x_axis_transform = !x_axis_transform;
+                    //}
+                    //if tile.flip_d {
+                    //    x_axis_transform = !x_axis_transform;
+                    //    y_axis_transform = !y_axis_transform;
+                    //}
+
+
+                    //std::f32::consts::PI;
                     
                     // Create the tile entity
                     world
@@ -276,37 +325,6 @@ impl GameState {
             }
         }
         self.map = Some(map);
-    }
-}
-
-impl SimpleState for GameState {
-    fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
-        println!("Game is starting!!");
-        let world = _data.world;
-
-        //world.register::<CameraMovementSystem>();
-
-        let _cam = init_camera(world);
-    }
-
-    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
-        //println!("Handling event!");
-        match &event {
-            StateEvent::Window(window_event) => {
-                if input::is_key_down(&window_event, VirtualKeyCode::Escape) {
-                    Trans::Push(Box::new(pause::PauseState::default()))
-                    //Trans::Quit
-                } else {
-                    Trans::None
-                }
-            },
-            _ => Trans::None
-        }
-    }
-
-    fn update(&mut self, _: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        //println!("Updating GameState!");
-        Trans::None
     }
 }
 
