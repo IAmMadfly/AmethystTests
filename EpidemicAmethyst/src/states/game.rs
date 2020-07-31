@@ -21,20 +21,22 @@ use tiled::parse;
 
 use crate::states::pause;
 
-
+#[derive(Clone)]
 pub struct AnimatedSprite {
-    animation_data:     Vec<tiled::Frame>,
-    current_index:      u32
+    pub animation_data:     Vec<tiled::Frame>,
+    pub curr_index:         usize,
+    pub curr_duration:      std::time::Duration
 }
 
 impl AnimatedSprite {
     fn new(data: Vec<tiled::Frame>) -> Self {
-        if data.len() < 1 {
+        if data.is_empty() {
             panic!("Cannot construct AnimatedSprite with no animation data");
         }
         AnimatedSprite {
             animation_data:     data,
-            current_index:      0
+            curr_index:         0,
+            curr_duration:      std::time::Duration::new(0, 0)
         }
     }
 }
@@ -42,7 +44,6 @@ impl AnimatedSprite {
 impl Component for AnimatedSprite {
     type Storage = DenseVecStorage<Self>;
 }
-
 
 #[derive(Debug)]
 pub struct GameState {
@@ -124,8 +125,9 @@ impl GameState {
                 tiles.get(0).expect("Failed to get first tile").images.get(0).expect("Failed to get first image in tile")
             }
         };
-    
-        let mut sprite_sheet_handles: HashMap<u32, Handle<SpriteSheet>> = HashMap::new();
+
+        let mut animated_sprite_data: HashMap<u32, AnimatedSprite> =        HashMap::new();
+        let mut sprite_sheet_handles: HashMap<u32, Handle<SpriteSheet>> =   HashMap::new();
         for tileset in map.tilesets.iter() {
     
             // Get first image in tileset
@@ -242,10 +244,18 @@ impl GameState {
                 }
 
                 // Find animated tiles and implement an animated tile Component for them
-                if let Some(tileAnimationData) = &tile.animation {
+                if let Some(tile_animation_data) = &tile.animation {
                     println!("Found an animated tile!");
+                    animated_sprite_data.insert(
+                        tileset.first_gid + tile.id,
+                        AnimatedSprite::new(tile_animation_data.clone())
+                    );
                 }
             }
+        }
+
+        for key in animated_sprite_data.keys() {
+            println!("ANimated sprites are: {}", key);
         }
             
         // Loop the row first and then the individual tiles on that row
@@ -340,13 +350,21 @@ impl GameState {
                             );
                         }
                     }
-                    
-                    // Create the tile entity
-                    world
+
+                    if animated_sprite_data.contains_key(&tile.gid) {
+                        world
+                        .create_entity()
+                        .with(tile_transform)
+                        .with(tile_sprite)
+                        .with(animated_sprite_data[&tile.gid].clone())
+                        .build();
+                    } else {
+                        world
                         .create_entity()
                         .with(tile_transform)
                         .with(tile_sprite)
                         .build();
+                    }
                 }
             }
         }

@@ -39,6 +39,11 @@ fn main() -> amethyst::Result<()> {
             "camera_movement",
             &[]
         )
+        .with(
+            systems::animation::SpriteAnimationSystem::default(),
+            "sprite_animation",
+            &[]
+        )
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(

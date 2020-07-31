@@ -25,10 +25,6 @@ impl Default for CameraMovementSystem {
     }
 }
 
-impl Component for CameraMovementSystem {
-    type Storage = VecStorage<Self>;
-}
-
 impl<'s> System<'s> for CameraMovementSystem {
     type SystemData = (
         WriteStorage<'s, Camera>,
