@@ -2,7 +2,7 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::transform::Transform,
     prelude::*,
-    ecs::prelude::Entity,
+    ecs::prelude::{Entity, Component, DenseVecStorage},
     input,
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
@@ -23,12 +23,25 @@ use crate::states::pause;
 
 
 pub struct AnimatedSprite {
-
+    animation_data:     Vec<tiled::Frame>,
+    current_index:      u32
 }
 
+impl AnimatedSprite {
+    fn new(data: Vec<tiled::Frame>) -> Self {
+        if data.len() < 1 {
+            panic!("Cannot construct AnimatedSprite with no animation data");
+        }
+        AnimatedSprite {
+            animation_data:     data,
+            current_index:      0
+        }
+    }
+}
 
-
-
+impl Component for AnimatedSprite {
+    type Storage = DenseVecStorage<Self>;
+}
 
 
 #[derive(Debug)]
@@ -175,8 +188,8 @@ impl GameState {
                 };
     
                 let sprite_sheet_handle = {
-                    let loader = world.read_resource::<Loader>();
-                    let sprite_sheet_storage = world.read_resource::<AssetStorage<SpriteSheet>>();
+                    let loader =                world.read_resource::<Loader>();
+                    let sprite_sheet_storage =  world.read_resource::<AssetStorage<SpriteSheet>>();
                     
                     loader.load_from_data(sprite_sheet, (), &sprite_sheet_storage)
                 };
@@ -226,6 +239,11 @@ impl GameState {
                         tileset.first_gid + tile.id,
                         sprite_sheet_handle
                     );
+                }
+
+                // Find animated tiles and implement an animated tile Component for them
+                if let Some(tileAnimationData) = &tile.animation {
+                    println!("Found an animated tile!");
                 }
             }
         }
