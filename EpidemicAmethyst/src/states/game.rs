@@ -20,6 +20,7 @@ use std::{
 use tiled::parse;
 
 use crate::states::pause;
+use crate::infection::infection;
 
 #[derive(Clone)]
 pub struct AnimatedSprite {
@@ -48,14 +49,14 @@ impl Component for AnimatedSprite {
 #[derive(Debug)]
 pub struct GameState {
     map:            Option<tiled::Map>,
-    map_entities:   Option<Vec<Entity>>
+    homes:          Vec<infection::Home>
 }
 
 impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            map_entities:   None
+            homes:          Vec::<infection::Home>::new()
         }
     }
 }
@@ -98,6 +99,24 @@ impl GameState {
             "../../Map",
             world
         );
+
+        if let Some(map) = self.map {
+            for object_group in map.object_groups {
+                if object_group.name == "Homes" {
+                    self.load_houses(&object_group);
+                }
+            }
+        }
+    }
+
+    fn load_houses(&mut self, homes_object: &tiled::ObjectGroup) {
+
+        // Start loading individual houses into GameState
+        for home_object in homes_object.objects {
+            self.homes.append(
+                infection::Home::new(home_object)
+            );
+        }
     }
 
     fn load_map(
@@ -341,13 +360,15 @@ impl GameState {
                         tile_transform.set_rotation_z_axis(
                             std::f32::consts::PI/2.0
                         );
-                        if !tile.flip_v && tile.flip_h {
-                            tile_transform.append_rotation_y_axis(
-                                std::f32::consts::PI
-                            );
+                        if tile.flip_h {
                             tile_transform.append_rotation_x_axis(
                                 std::f32::consts::PI
                             );
+                            if !tile.flip_v {
+                                tile_transform.append_rotation_y_axis(
+                                    std::f32::consts::PI
+                                );
+                            }
                         }
                     }
 

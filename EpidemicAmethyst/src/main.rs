@@ -17,6 +17,7 @@ use amethyst::{
 mod systems;
 mod states;
 mod tools;
+mod infection;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
