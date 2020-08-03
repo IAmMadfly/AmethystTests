@@ -100,22 +100,16 @@ impl GameState {
             world
         );
 
-        if let Some(map) = self.map {
-            for object_group in map.object_groups {
+        if let Some(map) = &self.map {
+            for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
-                    self.load_houses(&object_group);
+                    for home_object in &object_group.objects {
+                        self.homes.push(
+                            infection::Home::new(home_object)
+                        );
+                    }
                 }
             }
-        }
-    }
-
-    fn load_houses(&mut self, homes_object: &tiled::ObjectGroup) {
-
-        // Start loading individual houses into GameState
-        for home_object in homes_object.objects {
-            self.homes.append(
-                infection::Home::new(home_object)
-            );
         }
     }
 
