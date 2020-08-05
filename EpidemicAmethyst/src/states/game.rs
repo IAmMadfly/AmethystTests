@@ -20,7 +20,7 @@ use std::{
 use tiled::parse;
 
 use crate::states::pause;
-use crate::infection::infection;
+use crate::infection;
 
 #[derive(Clone)]
 pub struct AnimatedSprite {
@@ -49,14 +49,14 @@ impl Component for AnimatedSprite {
 #[derive(Debug)]
 pub struct GameState {
     map:            Option<tiled::Map>,
-    homes:          Vec<infection::Home>
+    homes:          Vec<infection::population::Home>
 }
 
 impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            homes:          Vec::<infection::Home>::new()
+            homes:          Vec::<infection::population::Home>::new()
         }
     }
 }
@@ -105,7 +105,7 @@ impl GameState {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
                         self.homes.push(
-                            infection::Home::new(home_object)
+                            infection::population::Home::new(home_object)
                         );
                     }
                 }
@@ -268,7 +268,7 @@ impl GameState {
         }
 
         for key in animated_sprite_data.keys() {
-            println!("ANimated sprites are: {}", key);
+            println!("Animated sprites are: {}", key);
         }
             
         // Loop the row first and then the individual tiles on that row
