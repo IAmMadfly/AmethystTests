@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Passer<T> {
     pub item:   Option<Rc<RefCell<T>>>
 }

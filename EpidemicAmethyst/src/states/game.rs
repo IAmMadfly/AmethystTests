@@ -46,7 +46,6 @@ impl Component for AnimatedSprite {
     type Storage = DenseVecStorage<Self>;
 }
 
-#[derive(Debug)]
 pub struct GameState {
     map:            Option<tiled::Map>,
     homes:          Vec<infection::population::Home>

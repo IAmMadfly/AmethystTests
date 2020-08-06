@@ -10,7 +10,6 @@ use crate::states::game;
 use crate::tools::passer;
 use std::thread;
 
-#[derive(Debug)]
 pub struct WelcomeState {
     game_loader:    passer::Passer<game::GameState>,
     ui_handle:      Option<Entity>,

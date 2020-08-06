@@ -25,17 +25,15 @@ fn rand_sex() -> Sex {
     }
 }
 
-#[derive(Debug)]
 struct Person {
     family_id:      u64,
     name:           String,
     sex:            Sex,
     parents:        [Option<Weak<Person>>; 2],
     children:       Vec<Rc<Person>>,
-    infection:      Option<Rc<infection::Disease>>
+    infection:      Option<Rc<dyn infection::Disease>>
 }
 
-#[derive(Debug)]
 struct Family {
     people:         Vec<Person>
 }
@@ -49,7 +47,6 @@ impl Family {
     }
 }
 
-#[derive(Debug)]
 pub struct Home {
     id:             u32,
     home_type:      HomeType,

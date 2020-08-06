@@ -1,20 +1,23 @@
 use std::rc::{Rc, Weak};
 
-#[derive(Debug)]
-enum DiseaseType {
-    Virus
+pub trait Disease {
+    fn name(&self) -> &str;
+
+    fn surface_chance(&self) -> f32;
 }
 
-#[derive(Debug)]
-pub struct Disease {
-    disease_type:       DiseaseType,
-    parent:             Option<Weak<Disease>>,
-    children:           Vec<Rc<Disease>>,
-    attributes:         Vec<Attribute>
+pub struct Virus {
+    parent:             Option<Weak<Virus>>,
+    children:           Vec<Rc<Virus>>,
+
 }
 
-#[derive(Debug)]
-struct Attribute {
-    //disease_types:      Vec<DiseaseType>,
-    effect_interval:    f32,    // Amount of days before attribute effects
+impl Disease for Virus {
+    fn name(&self) -> &str {
+        "Virus"
+    }
+
+    fn surface_chance(&self) -> f32 {
+        0.24
+    }
 }
