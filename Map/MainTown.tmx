@@ -464,7 +464,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="7" name="WorkPlaces" visible="0">
+ <objectgroup id="7" name="WorkPlaces">
   <object id="34" type="4" x="65.3333" y="2" width="145.333" height="156"/>
   <object id="35" type="0" x="226" y="1.33333" width="124.667" height="156.667"/>
   <object id="36" type="5" x="448.667" y="1.33333" width="145.333" height="159.333"/>

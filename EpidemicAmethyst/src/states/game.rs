@@ -1,6 +1,9 @@
 use amethyst::{
     assets::{AssetStorage, Loader, Handle},
-    core::transform::Transform,
+    core::{
+        transform::Transform,
+        math::Vector3
+    },
     prelude::*,
     ecs::prelude::{Entity, Component, DenseVecStorage},
     input,
@@ -17,6 +20,7 @@ use std::{
     path::Path,
     fs::File
     };
+
 use tiled::parse;
 
 use crate::states::pause;
@@ -337,6 +341,9 @@ impl GameState {
                         offset_x + x_coord as f32,
                         offset_y + y_coord as f32,
                         1.0 - (l as f32 * 0.1)
+                    );
+                    tile_transform.set_scale(
+                        Vector3::new(1.001, 1.001, 1.0)
                     );
 
                     if tile.flip_v {
