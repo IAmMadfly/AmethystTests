@@ -2,13 +2,15 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::{
         transform::Transform,
-        math::Vector3
+        math::{Vector3, Point2}
     },
     prelude::*,
     ecs::prelude::{Entity, Component, DenseVecStorage},
     input,
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
+        debug_drawing,
+        palette::Srgba,
         Camera, ImageFormat, Texture},
     window::{ScreenDimensions},
     winit::VirtualKeyCode
@@ -52,14 +54,16 @@ impl Component for AnimatedSprite {
 
 pub struct GameState {
     map:            Option<tiled::Map>,
-    homes:          Vec<infection::population::Home>
+    homes:          Vec<infection::population::Home>,
+    linesComponent: debug_drawing::DebugLinesComponent
 }
 
 impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            homes:          Vec::<infection::population::Home>::new()
+            homes:          Vec::<infection::population::Home>::new(),
+            linesComponent: debug_drawing::DebugLinesComponent::new()
         }
     }
 }
@@ -114,6 +118,13 @@ impl GameState {
                 }
             }
         }
+
+        self.linesComponent.add_rectangle_2d(
+            Point2::new(0.0, 0.0),
+            Point2::new(10.0, 10.0),
+            2.1,
+            Srgba::new(255.0,255.0,255.0,255.0)
+        );
     }
 
     fn load_map(
@@ -340,10 +351,11 @@ impl GameState {
                     tile_transform.set_translation_xyz(
                         offset_x + x_coord as f32,
                         offset_y + y_coord as f32,
-                        1.0 - (l as f32 * 0.1)
+                        1.0 - (l as f32 * 0.01)
                     );
+                    // Stop gaps between sprites
                     tile_transform.set_scale(
-                        Vector3::new(1.001, 1.001, 1.0)
+                        Vector3::new(1.0001, 1.0001, 1.0)
                     );
 
                     if tile.flip_v {
