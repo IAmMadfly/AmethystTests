@@ -16,6 +16,7 @@ use amethyst::{
 
 mod systems;
 mod states;
+mod rend;
 mod tools;
 mod infection;
 

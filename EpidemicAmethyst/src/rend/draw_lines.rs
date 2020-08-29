@@ -1,0 +1,169 @@
+
+use amethyst::{
+    core::ecs::{World},
+    renderer::{
+        Backend,
+        Factory,
+        bundle::{
+            RenderPlugin, RenderPlan, RenderOrder, Target
+        }
+    },
+    error::Error
+};
+
+pub struct DrawDebugLinesDesc;
+
+impl DrawDebugLinesDesc {
+    /// Create instance of `DrawDebugLines` render group
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl<B: Backend> RenderGroupDesc<B, World> for DrawDebugLinesDesc {
+    fn build(
+        self,
+        _ctx: &GraphContext<B>,
+        factory: &mut Factory<B>,
+        _queue: QueueId,
+        _aux: &World,
+        framebuffer_width: u32,
+        framebuffer_height: u32,
+        subpass: hal::pass::Subpass<'_, B>,
+        _buffers: Vec<NodeBuffer>,
+        _images: Vec<NodeImage>,
+    ) -> Result<Box<dyn RenderGroup<B, World>>, failure::Error> {
+        #[cfg(feature = "profiler")]
+        profile_scope!("build");
+
+        let env = DynamicUniform::new(factory, pso::ShaderStageFlags::VERTEX)?;
+        let args = DynamicUniform::new(factory, pso::ShaderStageFlags::VERTEX)?;
+        let vertex = DynamicVertexBuffer::new();
+
+        let (pipeline, pipeline_layout) = build_lines_pipeline(
+            factory,
+            subpass,
+            framebuffer_width,
+            framebuffer_height,
+            vec![env.raw_layout(), args.raw_layout()],
+        )?;
+
+        Ok(Box::new(DrawDebugLines::<B> {
+            pipeline,
+            pipeline_layout,
+            env,
+            args,
+            vertex,
+            framebuffer_width: framebuffer_width as f32,
+            framebuffer_height: framebuffer_height as f32,
+            lines: Vec::new(),
+            change: Default::default(),
+        }))
+    }
+}
+
+/// Draws debug lines
+#[derive(Debug)]
+pub struct DrawDebugLines<B: Backend> {
+    pipeline: B::GraphicsPipeline,
+    pipeline_layout: B::PipelineLayout,
+    env: DynamicUniform<B, ViewArgs>,
+    args: DynamicUniform<B, DebugLinesArgs>,
+    vertex: DynamicVertexBuffer<B, DebugLine>,
+    framebuffer_width: f32,
+    framebuffer_height: f32,
+    lines: Vec<DebugLine>,
+    change: util::ChangeDetection,
+}
+
+impl<B: Backend> RenderGroup<B, World> for DrawDebugLines<B> {
+    fn prepare(
+        &mut self,
+        factory: &Factory<B>,
+        _queue: QueueId,
+        index: usize,
+        _subpass: hal::pass::Subpass<'_, B>,
+        resources: &World,
+    ) -> PrepareResult {
+        #[cfg(feature = "profiler")]
+        profile_scope!("prepare");
+
+        let (lines_comps, lines_res, line_params) = <(
+            WriteStorage<'_, DebugLinesComponent>,
+            Option<Write<'_, DebugLines>>,
+            Option<Read<'_, DebugLinesParams>>,
+        )>::fetch(resources);
+
+        let old_len = self.lines.len();
+        self.lines.clear();
+        for lines_component in (&lines_comps).join() {
+            self.lines.extend_from_slice(lines_component.lines());
+        }
+
+        if let Some(mut lines_res) = lines_res {
+            self.lines.extend(lines_res.drain());
+        };
+
+        let cam = CameraGatherer::gather(resources);
+        let line_width = line_params
+            .map(|p| p.line_width)
+            .unwrap_or(DebugLinesParams::default().line_width);
+
+        self.env.write(factory, index, cam.projview);
+        self.args.write(
+            factory,
+            index,
+            DebugLinesArgs {
+                screen_space_thickness: [
+                    (line_width * 2.0) / self.framebuffer_width,
+                    (line_width * 2.0) / self.framebuffer_height,
+                ]
+                .into(),
+            }
+            .std140(),
+        );
+
+        {
+            #[cfg(feature = "profiler")]
+            profile_scope!("write");
+            self.vertex
+                .write(factory, index, self.lines.len() as u64, Some(&self.lines));
+        }
+
+        let changed = old_len != self.lines.len();
+        self.change.prepare_result(index, changed)
+    }
+
+    fn draw_inline(
+        &mut self,
+        mut encoder: RenderPassEncoder<'_, B>,
+        index: usize,
+        _subpass: hal::pass::Subpass<'_, B>,
+        _resources: &World,
+    ) {
+        #[cfg(feature = "profiler")]
+        profile_scope!("draw");
+
+        if self.lines.is_empty() {
+            return;
+        }
+
+        let layout = &self.pipeline_layout;
+        encoder.bind_graphics_pipeline(&self.pipeline);
+        self.env.bind(index, layout, 0, &mut encoder);
+        self.args.bind(index, layout, 1, &mut encoder);
+        self.vertex.bind(index, 0, 0, &mut encoder);
+        unsafe {
+            encoder.draw(0..4, 0..self.lines.len() as u32);
+        }
+    }
+
+    fn dispose(self: Box<Self>, factory: &mut Factory<B>, _aux: &World) {
+        unsafe {
+            factory.device().destroy_graphics_pipeline(self.pipeline);
+            factory
+                .device()
+                .destroy_pipeline_layout(self.pipeline_layout);
+        }
+    }
+}

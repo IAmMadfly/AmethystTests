@@ -355,7 +355,7 @@ impl GameState {
                     );
                     // Stop gaps between sprites
                     tile_transform.set_scale(
-                        Vector3::new(1.0001, 1.0001, 1.0)
+                        Vector3::new(1.001, 1.001, 1.0)
                     );
 
                     if tile.flip_v {
