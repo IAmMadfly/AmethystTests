@@ -8,7 +8,13 @@ use amethyst::{
             RenderPlugin, RenderPlan, RenderOrder, Target
         }
     },
+    submodules::{DynamicUniform},
     error::Error
+};
+
+use rendy::{
+    graph::{GraphContext},
+    hal
 };
 
 pub struct DrawDebugLinesDesc;
