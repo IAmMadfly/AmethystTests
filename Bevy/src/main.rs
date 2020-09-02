@@ -1,8 +1,16 @@
 
-use bevy::prelude::App;
+use bevy::prelude::{
+    App, IntoQuerySystem, Commands
+};
 
 fn hello() {
     println!("Hello, world!");
+    println!("Hello, world! AGAIN!!");
+}
+
+fn add_people(mut commands: Commands) {
+    commands
+        .spawn()
 }
 
 fn main() {
