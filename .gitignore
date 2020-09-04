@@ -1,2 +1,5 @@
 pong/target/
 sdl/target/
+epidemic/target/
+Tiled-Amethyst-Example/target/
+Tiled-Amethyst-Example/Cargo.lock
