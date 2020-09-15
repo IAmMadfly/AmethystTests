@@ -16,7 +16,7 @@ use amethyst::{
 
 mod systems;
 mod states;
-mod rend;
+//mod rend;
 mod tools;
 mod infection;
 
@@ -44,6 +44,11 @@ fn main() -> amethyst::Result<()> {
         .with(
             systems::animation::SpriteAnimationSystem::default(),
             "sprite_animation",
+            &[]
+        )
+        .with(
+            amethyst::utils::ortho_camera::CameraOrthoSystem::default(),
+            "ortho_camera",
             &[]
         )
         .with_bundle(

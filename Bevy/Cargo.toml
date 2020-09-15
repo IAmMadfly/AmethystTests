@@ -1,5 +1,5 @@
 [package]
-name = "bevy"
+name = "bevy_test"
 version = "0.1.0"
 authors = ["karl.runge <karl.runge@defendtex.com>"]
 edition = "2018"

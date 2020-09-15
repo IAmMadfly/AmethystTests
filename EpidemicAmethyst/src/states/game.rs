@@ -7,6 +7,10 @@ use amethyst::{
     prelude::*,
     ecs::prelude::{Entity, Component, DenseVecStorage},
     input,
+    utils::ortho_camera::{
+        CameraOrtho,
+        CameraNormalizeMode
+    },
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
         debug_drawing,
@@ -75,7 +79,7 @@ impl SimpleState for GameState {
 
         //world.register::<CameraMovementSystem>();
 
-        let _cam = init_camera(world);
+        init_camera(world);
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -405,7 +409,7 @@ impl GameState {
     }
 }
 
-fn init_camera(world: &mut World) -> Camera {
+fn init_camera(world: &mut World) {
     let (width, height) = {
         let dimensions = world.read_resource::<ScreenDimensions>();
         (dimensions.width(), dimensions.height())
@@ -415,16 +419,14 @@ fn init_camera(world: &mut World) -> Camera {
 
     trans.set_translation_xyz(width * 0.5, height * 0.5, 10.0);
 
-    let cam = Camera::standard_2d(width, height);
 
     world
         .create_entity()
-        .with(cam.clone())
         .with(trans)
+        .with(Camera::standard_2d(width, height))
+        .with(CameraOrtho::normalized(CameraNormalizeMode::Contain))
         .named("main_camera")
         .build();
-    
-    cam
 }
 
 fn load_texture(path: String, world: &World) -> Handle<Texture>{

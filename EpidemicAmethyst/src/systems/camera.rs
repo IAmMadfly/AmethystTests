@@ -66,24 +66,18 @@ impl<'s> System<'s> for CameraMovementSystem {
 
         for (camera, _transform) in (&mut camera, &mut transforms).join() {
 
-            if let Some(ortho_view) = camera.projection_mut().as_orthographic_mut() {
-                ortho_view.set_bottom_and_top(
-                    bottom,
-                    top
-                );
-                ortho_view.set_left_and_right(
-                    left,
-                    right
-                );
+            
 
-                //println!(
-                //    "top: {}, Right: {}, Bottom: {}, Left: {}", 
-                //    ortho_view.top(),
-                //    ortho_view.right(),
-                //    ortho_view.bottom(),
-                //    ortho_view.left()
-                //);
-            }
+            //if let Some(ortho_view) = camera.projection_mut().as_orthographic_mut() {
+            //    ortho_view.set_bottom_and_top(
+            //        bottom,
+            //        top
+            //    );
+            //    ortho_view.set_left_and_right(
+            //        left,
+            //        right
+            //    );
+            //}
         }
     }
 }
