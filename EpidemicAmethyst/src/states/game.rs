@@ -2,19 +2,16 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::{
         transform::Transform,
-        math::{Vector3, Point2}
+        math::{Vector3, Vector2, Point3, Point2}
     },
     prelude::*,
     ecs::prelude::{Entity, Component, DenseVecStorage},
-    input,
-    utils::ortho_camera::{
-        CameraOrtho,
-        CameraNormalizeMode
-    },
+    input::{self, InputEvent},
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
         debug_drawing,
         palette::Srgba,
+        rendy::{wsi::winit::MouseButton},
         Camera, ImageFormat, Texture},
     window::{ScreenDimensions},
     winit::VirtualKeyCode
@@ -59,7 +56,7 @@ impl Component for AnimatedSprite {
 pub struct GameState {
     map:            Option<tiled::Map>,
     homes:          Vec<infection::population::Home>,
-    linesComponent: debug_drawing::DebugLinesComponent
+    camera:         Option<Entity>
 }
 
 impl Default for GameState {
@@ -67,7 +64,7 @@ impl Default for GameState {
         GameState{
             map:            None,
             homes:          Vec::<infection::population::Home>::new(),
-            linesComponent: debug_drawing::DebugLinesComponent::new()
+            camera:         None
         }
     }
 }
@@ -79,10 +76,10 @@ impl SimpleState for GameState {
 
         //world.register::<CameraMovementSystem>();
 
-        init_camera(world);
+        self.camera = Some(init_camera(world));
     }
 
-    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, _state_data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
         //println!("Handling event!");
         match &event {
             StateEvent::Window(window_event) => {
@@ -93,8 +90,34 @@ impl SimpleState for GameState {
                     Trans::None
                 }
             },
-            StateEvent::Input(input::InputEvent(input::InputEvent::MouseButtonReleased)) => {
-                println!("Got a thing");
+            StateEvent::Input(InputEvent::MouseButtonReleased(MouseButton::Left)) => {
+                
+                if let Some(cam) = self.camera {
+
+                    let input_handler = 
+                        _state_data
+                        .world
+                        .read_resource::<input::InputHandler<input::StringBindings>>();
+                    
+                    let screen_dimentions =
+                        _state_data
+                        .world
+                        .read_resource::<ScreenDimensions>();
+
+                    if let Some(position) = input_handler.mouse_position() {
+                        println!("x: {}, y: {}", position.0, position.1);
+    
+                        let camera = _state_data.world.read_component::<Camera>();
+                        let transform = _state_data.world.read_component::<Transform>();
+
+                        let transform_comp = 
+                            transform.get(cam).expect("Failed to get transform Component for Camera");
+                        
+                        println!("World pos: {}, {}, {}, {}", position.0, position.1 , transform_comp.translation(), transform_comp.scale().x);
+                        println!("Clicked x is: {}", (transform_comp.translation().x - screen_dimentions.width()/2.0 + position.0));
+                    }
+                }
+                
                 Trans::None
             },
             _ => Trans::None
@@ -126,13 +149,6 @@ impl GameState {
                 }
             }
         }
-
-        self.linesComponent.add_rectangle_2d(
-            Point2::new(0.0, 0.0),
-            Point2::new(10.0, 10.0),
-            2.1,
-            Srgba::new(255.0,255.0,255.0,255.0)
-        );
     }
 
     fn load_map(
@@ -413,7 +429,7 @@ impl GameState {
     }
 }
 
-fn init_camera(world: &mut World) {
+fn init_camera(world: &mut World) -> Entity {
     let (width, height) = {
         let dimensions = world.read_resource::<ScreenDimensions>();
         (dimensions.width(), dimensions.height())
@@ -423,14 +439,12 @@ fn init_camera(world: &mut World) {
 
     trans.set_translation_xyz(width * 0.5, height * 0.5, 10.0);
 
-
     world
         .create_entity()
         .with(trans)
         .with(Camera::standard_2d(width, height))
-        //.with(CameraOrtho::normalized(CameraNormalizeMode::Contain))
         .named("main_camera")
-        .build();
+        .build()
 }
 
 fn load_texture(path: String, world: &World) -> Handle<Texture>{
