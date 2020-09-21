@@ -93,6 +93,10 @@ impl SimpleState for GameState {
                     Trans::None
                 }
             },
+            StateEvent::Input(input::InputEvent(input::InputEvent::MouseButtonReleased)) => {
+                println!("Got a thing");
+                Trans::None
+            },
             _ => Trans::None
         }
     }
@@ -424,7 +428,7 @@ fn init_camera(world: &mut World) {
         .create_entity()
         .with(trans)
         .with(Camera::standard_2d(width, height))
-        .with(CameraOrtho::normalized(CameraNormalizeMode::Contain))
+        //.with(CameraOrtho::normalized(CameraNormalizeMode::Contain))
         .named("main_camera")
         .build();
 }
