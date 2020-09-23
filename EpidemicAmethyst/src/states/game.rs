@@ -106,15 +106,24 @@ impl SimpleState for GameState {
 
                     if let Some(position) = input_handler.mouse_position() {
                         println!("x: {}, y: {}", position.0, position.1);
+                        let screen_point = Point3::new(position.0, position.1, 0.0);
+                        let screen_size = Vector2::new(
+                            screen_dimentions.width(), 
+                            screen_dimentions.height()
+                        );
     
                         let camera = _state_data.world.read_component::<Camera>();
                         let transform = _state_data.world.read_component::<Transform>();
 
                         let transform_comp = 
-                            transform.get(cam).expect("Failed to get transform Component for Camera");
+                            transform.get(cam).expect("Failed to get Transform Component for Camera");
+                        let camera_comp = 
+                            camera.get(cam).expect("Failed to get Camera Component for Camera");
                         
-                        println!("World pos: {}, {}, {}, {}", position.0, position.1 , transform_comp.translation(), transform_comp.scale().x);
-                        println!("Clicked x is: {}", (transform_comp.translation().x - screen_dimentions.width()/2.0 + position.0));
+                        let world_point = camera_comp.screen_to_world_point(screen_point, screen_size, transform_comp);
+                        println!("World point: {}, {}", (world_point.x/32.0).floor(), (world_point.y/32.0).floor());
+                        
+                        
                     }
                 }
                 
