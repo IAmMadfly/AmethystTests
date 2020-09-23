@@ -105,7 +105,6 @@ impl SimpleState for GameState {
                         .read_resource::<ScreenDimensions>();
 
                     if let Some(position) = input_handler.mouse_position() {
-                        println!("x: {}, y: {}", position.0, position.1);
                         let screen_point = Point3::new(position.0, position.1, 0.0);
                         let screen_size = Vector2::new(
                             screen_dimentions.width(), 
@@ -120,8 +119,16 @@ impl SimpleState for GameState {
                         let camera_comp = 
                             camera.get(cam).expect("Failed to get Camera Component for Camera");
                         
-                        let world_point = camera_comp.screen_to_world_point(screen_point, screen_size, transform_comp);
-                        println!("World point: {}, {}", (world_point.x/32.0).floor(), (world_point.y/32.0).floor());
+                        let world_point = camera_comp.screen_to_world_point(
+                            screen_point, 
+                            screen_size, 
+                            transform_comp
+                        );
+                        let world_location = ((world_point.x/32.0).floor() as u32, (world_point.y/32.0).floor() as u32);
+
+                        if let Some(_home) = self.check_home_location(world_location) {
+                            println!("Is a home location!!")
+                        }
                         
                         
                     }
@@ -140,6 +147,17 @@ impl SimpleState for GameState {
 }
 
 impl GameState {
+    fn check_home_location(&self, location: (u32, u32)) -> Option<&infection::population::Home> {
+        for home in &self.homes {
+            if (home.location.0 <= location.0) && (home.location.1 <= location.1) {
+                if ((home.location.0 + home.size.0) > location.0) & ((home.location.1 + home.size.1) > location.1) {
+                    return Some(home)
+                }
+            }
+        }
+        None
+    }
+    
     pub fn load_game_map(&mut self, world: &mut World) {
         self.load_map(
             "../Map/MainTown.tmx",
@@ -148,11 +166,12 @@ impl GameState {
         );
 
         if let Some(map) = &self.map {
+            let map_size = (map.width as u64 * 32, map.height as u64 * 32);
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
                         self.homes.push(
-                            infection::population::Home::new(home_object)
+                            infection::population::Home::new(home_object, map_size)
                         );
                     }
                 }

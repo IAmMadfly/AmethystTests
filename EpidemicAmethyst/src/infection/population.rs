@@ -48,15 +48,15 @@ impl Family {
 }
 
 pub struct Home {
-    id:             u32,
-    home_type:      HomeType,
-    families:       Vec<Family>,
-    location:       (u32, u32),
-    size:           (u32, u32)
+        id:                 u32,
+        home_type:          HomeType,
+        families:           Vec<Family>,
+    pub location:           (u32, u32),
+    pub size:               (u32, u32)
 }
 
 impl Home {
-    pub fn new(home_data: &tiled::Object) -> Self {
+    pub fn new(home_data: &tiled::Object, map_size: (u64, u64)) -> Self {
         let mut _people_count =  0;
         let prop_val =          home_data
                                     .properties
@@ -70,12 +70,16 @@ impl Home {
             _people_count =  rand::thread_rng().gen_range(3, 25);
         }
 
+        println!("New home location: {:?}, map size: {:?}", (home_data.x, home_data.y), map_size);
+
+        let size = ((home_data.width/32.0).round() as u32, (home_data.height/32.0).round() as u32);
+
         Home {
             id:             home_data.id,
             home_type:      HomeType::Appartment,
             families:       Family::generate_families(_people_count),
-            location:       (home_data.x.round() as u32, home_data.y.round() as u32),
-            size:           (home_data.width.round() as u32, home_data.height.round() as u32)
+            size:           size,
+            location:       ((home_data.x/32.0).round() as u32, (((map_size.1 as f32 - home_data.y)/32.0).round() as u32 - size.1))
         }
     }
 }
