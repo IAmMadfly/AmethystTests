@@ -127,7 +127,8 @@ impl SimpleState for GameState {
                         let world_location = ((world_point.x/32.0).floor() as u32, (world_point.y/32.0).floor() as u32);
 
                         if let Some(_home) = self.check_home_location(world_location) {
-                            println!("Is a home location!!")
+                            println!("Is a home location!!");
+                            println!("Home has {} families", _home.families.len());
                         }
                         
                         

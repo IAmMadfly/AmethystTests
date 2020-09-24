@@ -34,7 +34,7 @@ struct Person {
     infection:      Option<Rc<dyn infection::Disease>>
 }
 
-struct Family {
+pub struct Family {
     people:         Vec<Person>
 }
 
@@ -43,6 +43,14 @@ impl Family {
         let vector: Vec<Family> = Vec::new();
         println!("{} people", people_count);
 
+        while people_count > 0 {
+            let random_float: f32 = rand::random();
+
+            match random_float {
+                0.0..=0.6 => {println!("Guess it is a fam then")},
+                _ => {break}
+            }
+        }
         vector
     }
 }
@@ -50,7 +58,7 @@ impl Family {
 pub struct Home {
         id:                 u32,
         home_type:          HomeType,
-        families:           Vec<Family>,
+    pub families:           Vec<Family>,
     pub location:           (u32, u32),
     pub size:               (u32, u32)
 }
