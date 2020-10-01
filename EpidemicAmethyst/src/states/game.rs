@@ -26,7 +26,7 @@ use std::{
 
 use tiled::parse;
 
-use crate::states::pause;
+use crate::states;
 use crate::infection;
 
 #[derive(Clone)]
@@ -53,10 +53,16 @@ impl Component for AnimatedSprite {
     type Storage = DenseVecStorage<Self>;
 }
 
+enum PlayStateEnum {
+    Paused,
+    InGame
+}
+
 pub struct GameState {
     map:            Option<tiled::Map>,
     homes:          Vec<infection::population::Home>,
-    camera:         Option<Entity>
+    camera:         Option<Entity>,
+    play_state:     Option<PlayStateEnum>
 }
 
 impl Default for GameState {
@@ -64,7 +70,8 @@ impl Default for GameState {
         GameState{
             map:            None,
             homes:          Vec::<infection::population::Home>::new(),
-            camera:         None
+            camera:         None,
+            play_state:     None
         }
     }
 }
@@ -77,6 +84,11 @@ impl SimpleState for GameState {
         //world.register::<CameraMovementSystem>();
 
         self.camera = Some(init_camera(world));
+
+        let play_state = PlayStateEnum::InGame;
+
+        world.insert(play_state);
+        self.play_state = Some(play_state);
     }
 
     fn handle_event(&mut self, _state_data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -129,9 +141,9 @@ impl SimpleState for GameState {
                         if let Some(_home) = self.check_home_location(world_location) {
                             println!("Is a home location!!");
                             println!("Home has {} families", _home.families.len());
+
+                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(_home, _state_data.world)))
                         }
-                        
-                        
                     }
                 }
                 

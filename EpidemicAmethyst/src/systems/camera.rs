@@ -7,6 +7,8 @@ use amethyst::{
     window::ScreenDimensions
 };
 
+use crate::states::game;
+
 pub struct CameraMovementSystem {
     prev_mouse_pos:         Option<(f32, f32)>,
     camera_center:          [f32; 2],
@@ -29,7 +31,8 @@ impl<'s> System<'s> for CameraMovementSystem {
     type SystemData = (
         WriteStorage<'s, Camera>,
         WriteStorage<'s, Transform>,
-        Read<'s, InputHandler<StringBindings>>
+        Read<'s, InputHandler<StringBindings>>,
+        Read<'s, game::GameState>
     );
 
     fn run(&mut self, (mut camera, mut transforms, input_handler): Self::SystemData) {
