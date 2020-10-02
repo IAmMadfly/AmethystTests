@@ -53,7 +53,7 @@ impl Component for AnimatedSprite {
     type Storage = DenseVecStorage<Self>;
 }
 
-enum PlayStateEnum {
+pub enum PlayStateEnum {
     Paused,
     InGame
 }
@@ -81,22 +81,18 @@ impl SimpleState for GameState {
         println!("Game is starting!!");
         let world = _data.world;
 
+        world.insert(PlayStateEnum::InGame);
         //world.register::<CameraMovementSystem>();
 
         self.camera = Some(init_camera(world));
-
-        let play_state = PlayStateEnum::InGame;
-
-        world.insert(play_state);
-        self.play_state = Some(play_state);
     }
 
-    fn handle_event(&mut self, _state_data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, state_data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
         //println!("Handling event!");
         match &event {
             StateEvent::Window(window_event) => {
                 if input::is_key_down(&window_event, VirtualKeyCode::Escape) {
-                    Trans::Push(Box::new(pause::PauseState::default()))
+                    Trans::Push(Box::new(states::pause::PauseState::default()))
                     //Trans::Quit
                 } else {
                     Trans::None
@@ -107,12 +103,12 @@ impl SimpleState for GameState {
                 if let Some(cam) = self.camera {
 
                     let input_handler = 
-                        _state_data
+                        state_data
                         .world
                         .read_resource::<input::InputHandler<input::StringBindings>>();
                     
                     let screen_dimentions =
-                        _state_data
+                        state_data
                         .world
                         .read_resource::<ScreenDimensions>();
 
@@ -123,8 +119,8 @@ impl SimpleState for GameState {
                             screen_dimentions.height()
                         );
     
-                        let camera = _state_data.world.read_component::<Camera>();
-                        let transform = _state_data.world.read_component::<Transform>();
+                        let camera = state_data.world.read_component::<Camera>();
+                        let transform = state_data.world.read_component::<Transform>();
 
                         let transform_comp = 
                             transform.get(cam).expect("Failed to get Transform Component for Camera");
@@ -138,11 +134,11 @@ impl SimpleState for GameState {
                         );
                         let world_location = ((world_point.x/32.0).floor() as u32, (world_point.y/32.0).floor() as u32);
 
-                        if let Some(_home) = self.check_home_location(world_location) {
+                        if let Some(home) = self.check_home_location(world_location) {
                             println!("Is a home location!!");
-                            println!("Home has {} families", _home.families.len());
+                            println!("Home has {} families", home.families.len());
 
-                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(_home, _state_data.world)))
+                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(home, state_data.world)))
                         }
                     }
                 }

@@ -1096,6 +1096,7 @@ dependencies = [
  "amethyst",
  "rand 0.7.3",
  "rendy 0.5.1",
+ "shred",
  "tiled",
 ]
 

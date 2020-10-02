@@ -6,6 +6,8 @@ use amethyst::{
     winit::VirtualKeyCode
 };
 
+use crate::states::game::PlayStateEnum;
+
 pub struct PauseState {
     ui_handle:      Option<Entity>
 }
@@ -23,7 +25,13 @@ impl SimpleState for PauseState {
         &mut self, 
         _data: StateData<'_, GameData<'_, '_>>
     ) {
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
+        println!("Entered PauseState");
+    }
 
+    fn on_stop(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
+        println!("Exit PauseState");
     }
 
     fn update(

@@ -1,11 +1,14 @@
 use amethyst::{
     winit,
+    prelude::World,
     core::{Transform, math},
     ecs::{Component, Join, Read, ReadExpect, System, VecStorage, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::camera::Camera,
     window::ScreenDimensions
 };
+
+use shred::DynamicSystemData;
 
 use crate::states::game;
 
@@ -32,10 +35,20 @@ impl<'s> System<'s> for CameraMovementSystem {
         WriteStorage<'s, Camera>,
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,
-        Read<'s, game::GameState>
+        Option<Read<'s, game::PlayStateEnum>>
     );
 
-    fn run(&mut self, (mut camera, mut transforms, input_handler): Self::SystemData) {
+    fn run(&mut self, (mut camera, mut transforms, input_handler, game_play_state): Self::SystemData) {
+        if let Some(play_state) = game_play_state {
+            match *play_state {
+                game::PlayStateEnum::Paused => return,
+                game::PlayStateEnum::InGame => println!("Running!")
+            }
+        } else {
+            println!("No gamestate found!");
+            return
+        }
+
         let mouse_pos = input_handler.mouse_position();
         
         // Change width value

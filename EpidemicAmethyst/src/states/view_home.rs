@@ -1,36 +1,22 @@
 use amethyst::{
-    ecs::prelude::Entity,
     assets::Loader,
+    ecs::Entity,
     input,
     prelude::*,
-    ui::{UiCreator, UiFinder, UiEvent, UiText, UiEventType, UiButtonBuilder, UiButton, LineMode, Anchor, TtfFormat},
+    ui::{UiTransform, UiText, LineMode, Anchor, TtfFormat},
     winit::VirtualKeyCode
 };
-
+use crate::states::game::PlayStateEnum;
 use crate::infection::population;
 
 pub struct ViewHomeState {
-    people_text:    UiText
+    people_count_ui:        Option<Entity>
 }
 
 impl ViewHomeState {
-    fn new(home: population::Home, world: &World) -> Self {
-        let font_handle = world.read_resource::<Loader>().load(
-            "font/square.ttf",
-            TtfFormat,
-            (),
-            &world.read_resource()
-        );
-        let ui_text = UiText::new(
-            font_handle, 
-            home.families.len().to_string(), 
-            [1.0, 1.0, 1.0, 0.7], 
-            25.0, 
-            LineMode::Single, 
-            Anchor::Middle);
-
+    pub fn new(home: &population::Home) -> Self {
         ViewHomeState {
-            people_text:        ui_text
+            people_count_ui:    None
         }
     }
 }
@@ -41,6 +27,45 @@ impl SimpleState for ViewHomeState {
         _data: StateData<'_, GameData<'_, '_>>
     ) {
 
+        let font_handle = world.read_resource::<Loader>().load(
+            "font/square.ttf",
+            TtfFormat,
+            (),
+            &world.read_resource()
+        );
+
+        let ui_text_tranform = UiTransform::new(
+            String::from("people_text_transform"), 
+            Anchor::Middle, 
+            Anchor::Middle,
+            0.0,
+            0.0, 
+            0.0, 
+            100.0, 
+            30.0
+        );
+
+        let ui_text = UiText::new(
+            font_handle, 
+            home.families.len().to_string(), 
+            [1.0, 1.0, 1.0, 0.7], 
+            25.0, 
+            LineMode::Single, 
+            Anchor::Middle);
+        
+        let people_count_ui = world.create_entity()
+            .with(ui_text_tranform)
+            .with(ui_text)
+            .build();
+
+
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
+        println!("Entered ViewHomeState");
+    }
+
+    fn on_stop(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::InGame;
+        println!("Exiting ViewHomeState");
     }
 
     fn update(
