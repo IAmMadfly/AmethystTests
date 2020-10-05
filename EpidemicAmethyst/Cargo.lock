@@ -1094,6 +1094,7 @@ name = "epidemic"
 version = "0.1.0"
 dependencies = [
  "amethyst",
+ "num",
  "rand 0.7.3",
  "rendy 0.5.1",
  "shred",

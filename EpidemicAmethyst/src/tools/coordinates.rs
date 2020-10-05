@@ -1,0 +1,2 @@
+
+use amethyst::ecs::Component;

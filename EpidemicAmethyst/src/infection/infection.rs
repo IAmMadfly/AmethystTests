@@ -1,23 +1,12 @@
-use std::rc::{Rc, Weak};
 
-pub trait Disease {
-    fn name(&self) -> &str;
-
-    fn surface_chance(&self) -> f32;
+pub enum VirusType {
+    Stardand
 }
 
-pub struct Virus {
-    parent:             Option<Weak<Virus>>,
-    children:           Vec<Rc<Virus>>,
-
+pub enum BacteriaType {
+    Standard
 }
-
-impl Disease for Virus {
-    fn name(&self) -> &str {
-        "Virus"
-    }
-
-    fn surface_chance(&self) -> f32 {
-        0.24
-    }
+pub enum Disease {
+    Virus(VirusType),
+    Bacteria(BacteriaType)
 }

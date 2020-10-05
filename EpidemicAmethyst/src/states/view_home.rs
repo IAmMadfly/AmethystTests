@@ -10,12 +10,14 @@ use crate::states::game::PlayStateEnum;
 use crate::infection::population;
 
 pub struct ViewHomeState {
+    home:                   Entity,
     people_count_ui:        Option<Entity>
 }
 
 impl ViewHomeState {
-    pub fn new(home: &population::Home) -> Self {
+    pub fn new(home: Entity) -> Self {
         ViewHomeState {
+            home,
             people_count_ui:    None
         }
     }
@@ -24,8 +26,9 @@ impl ViewHomeState {
 impl SimpleState for ViewHomeState {
     fn on_start(
         &mut self, 
-        _data: StateData<'_, GameData<'_, '_>>
+        data: StateData<'_, GameData<'_, '_>>
     ) {
+        let mut world = data.world;
 
         let font_handle = world.read_resource::<Loader>().load(
             "font/square.ttf",
@@ -47,7 +50,9 @@ impl SimpleState for ViewHomeState {
 
         let ui_text = UiText::new(
             font_handle, 
-            home.families.len().to_string(), 
+            world.read_component::<population::Home>()
+                .get(self.home)
+                .expect("Failed to get Home component for Home").families().len().to_string(), 
             [1.0, 1.0, 1.0, 0.7], 
             25.0, 
             LineMode::Single, 
@@ -57,15 +62,21 @@ impl SimpleState for ViewHomeState {
             .with(ui_text_tranform)
             .with(ui_text)
             .build();
+        
+        self.people_count_ui = Some(people_count_ui);
 
-
-        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
+        *world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
         println!("Entered ViewHomeState");
     }
 
     fn on_stop(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
-        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::InGame;
         println!("Exiting ViewHomeState");
+
+        if let Some(people_count_entity) = self.people_count_ui {
+            _data.world.delete_entity(people_count_entity).expect("Failed to delete UI Entity");
+            self.people_count_ui = None;
+        }
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::InGame;
     }
 
     fn update(

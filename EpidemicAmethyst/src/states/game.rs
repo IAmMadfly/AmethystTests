@@ -60,7 +60,7 @@ pub enum PlayStateEnum {
 
 pub struct GameState {
     map:            Option<tiled::Map>,
-    homes:          Vec<infection::population::Home>,
+    homes:          Vec<Entity>,
     camera:         Option<Entity>,
     play_state:     Option<PlayStateEnum>
 }
@@ -69,7 +69,7 @@ impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            homes:          Vec::<infection::population::Home>::new(),
+            homes:          Vec::<Entity>::new(),
             camera:         None,
             play_state:     None
         }
@@ -132,13 +132,19 @@ impl SimpleState for GameState {
                             screen_size, 
                             transform_comp
                         );
-                        let world_location = ((world_point.x/32.0).floor() as u32, (world_point.y/32.0).floor() as u32);
+                        let world_location = ((world_point.x/32.0).floor(), (world_point.y/32.0).floor());
 
-                        if let Some(home) = self.check_home_location(world_location) {
+                        if let Some(home) = self.check_home_location(world_location, state_data.world) {
                             println!("Is a home location!!");
-                            println!("Home has {} families", home.families.len());
+                            println!("Home has {} families", 
+                                state_data.world.read_component::<infection::population::Home>()
+                                    .get(home)
+                                    .expect("Failed to get Home component for Home")
+                                    .families()
+                                    .len()  //home.families.len()
+                            );
 
-                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(home, state_data.world)))
+                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(home)))
                         }
                     }
                 }
@@ -156,10 +162,22 @@ impl SimpleState for GameState {
 }
 
 impl GameState {
-    fn check_home_location(&self, location: (u32, u32)) -> Option<&infection::population::Home> {
-        for home in &self.homes {
-            if (home.location.0 <= location.0) && (home.location.1 <= location.1) {
-                if ((home.location.0 + home.size.0) > location.0) & ((home.location.1 + home.size.1) > location.1) {
+    fn check_home_location(&self, location: (f32, f32), world: &World) -> Option<Entity> {
+        for home in self.homes.clone() {
+
+            let home_loc_comp = world.read_component::<infection::population::Location>();
+            let home_size_comp = world.read_component::<infection::population::Size<f32>>();
+
+            let home_location = home_loc_comp
+                .get(home)
+                .expect("Failed to get location for Home");
+            
+            let home_size = home_size_comp
+                .get(home)
+                .expect("Failed to get Size for home");
+
+            if (home_location.x() <= location.0) && (home_location.y() <= location.1) {
+                if ((home_location.x() + home_size.x()) > location.0) & ((home_location.y() + home_size.y()) > location.1) {
                     return Some(home)
                 }
             }
@@ -180,7 +198,7 @@ impl GameState {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
                         self.homes.push(
-                            infection::population::Home::new(home_object, map_size)
+                            infection::population::Home::new(home_object, map_size, world)
                         );
                     }
                 }
