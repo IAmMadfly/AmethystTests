@@ -166,7 +166,7 @@ impl GameState {
         for home in self.homes.clone() {
 
             let home_loc_comp = world.read_component::<infection::population::Location>();
-            let home_size_comp = world.read_component::<infection::population::Size<f32>>();
+            let home_size_comp = world.read_component::<infection::population::Size>();
 
             let home_location = home_loc_comp
                 .get(home)

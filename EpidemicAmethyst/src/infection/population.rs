@@ -32,21 +32,21 @@ fn rand_sex() -> Sex {
     }
 }
 
-pub struct Size<N: Num + Sync + Send + Clone + 'static> {
-    x:      N,
-    y:      N
+pub struct Size {
+    x:      f32,
+    y:      f32
 }
 
-impl<N: Num + Sync + Send + Clone + 'static> Component for Size<N> {
+impl Component for Size {
     type Storage = DenseVecStorage<Self>;
 }
 
-impl<N: Num + Clone + Send + Sync + Copy + 'static> Size<N> {
-    pub fn x(&self) -> N {
+impl Size {
+    pub fn x(&self) -> f32 {
         self.x
     }
 
-    pub fn y(&self) -> N {
+    pub fn y(&self) -> f32 {
         self.y
     }
 }
@@ -88,9 +88,16 @@ impl Home {
     }
 }
 
+enum FamilyType {
+    Single,
+    Partner,
+    Children
+}
+
 pub struct Family {
     parents:                Option<[Entity; 2]>,
-    children:               Vec<Entity>
+    children:               Vec<Entity>,
+    fam_type:               FamilyType
 }
 
 impl Component for Family {
@@ -99,27 +106,80 @@ impl Component for Family {
 
 impl Family {
     fn generate_families(family_count: u32, world: &mut World) -> Vec<Entity> {
+        // Should be a vector of Familiy Entities
         let vector: Vec<Entity> = Vec::new();
         println!("{} people", family_count);
 
-        while family_count > 0 {
+        let mut families_made = 0;
+
+        while (family_count-families_made) > 0 {
             let random_float: f32 = rand::random();
 
-            match random_float {
-                0.0..=0.6 => {println!("Guess it is a fam then")},
-                _ => {break}
-            }
+            if random_float < 0.2 {
+                vector.push(
+                    world.create_entity()
+                        .with(Family::make(FamilyType::Single, world))
+                        .build()
+                );
+                families_made += 1;
+            } else if random_float < 0.4 {
+
+                families_made += 1;
+            } else if random_float < 0.8 {
+
+                families_made += 1;
+            } else if random_float < 1.0 {
+
+                families_made += 1;
+            };
         }
         vector
     }
+
+    fn make(fam_type: FamilyType, world: &mut World) -> Family {
+        match fam_type {
+            FamilyType::Single => {
+                return Family {
+                    parents:    None,
+                    fam_type:   fam_type,
+                    children:   Vec::<Entity>::new()
+                }
+            }
+            FamilyType::Partner => {
+                return Family {
+                    parents:    None,
+                    fam_type:   fam_type,
+                    children:   Vec::<Entity>::new()
+                }
+            }
+            FamilyType::Children => {
+                return Family {
+                    parents:    None,
+                    fam_type:   fam_type,
+                    children:   Family::make_rand_children(world)
+                }
+            }
+        }
+    }
+
+    fn make_rand_children(world: &mut world) {
+
+    }
+
 }
+
+enum Relationship {
+    Partner(Entity),
+    Parent(Entity),
+    Child(Entity)
+}
+
 struct Person {
     family_id:      u64,
     name:           String,
     sex:            Sex,
     infection:      Option<infection::Disease>,
-    parents:        Option<[Entity; 2]>,
-    children:       Vec<Entity>
+    relationships:  Vec<Relationship>
 }
 
 impl Component for Person {
