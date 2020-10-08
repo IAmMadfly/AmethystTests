@@ -78,7 +78,7 @@ impl Default for GameState {
 
 impl SimpleState for GameState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
-        println!("Game is starting!!");
+        println!("-- Game is starting!! --");
         let world = _data.world;
 
         world.insert(PlayStateEnum::InGame);
@@ -182,6 +182,8 @@ impl GameState {
     }
     
     pub fn load_game_map(&mut self, world: &mut World) {
+        world.register::<infection::population::Building>();
+        world.register::<infection::population::Location>();
         self.load_map(
             "../Map/MainTown.tmx",
             "../../Map",

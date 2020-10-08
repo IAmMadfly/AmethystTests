@@ -1,3 +1,4 @@
+/*
 use amethyst::{
     prelude::*,
     ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage}
@@ -78,3 +79,4 @@ fn main(world: &mut World) {
     let people_pool = Vec<PeopleBuilder>;
 
 }
+*/

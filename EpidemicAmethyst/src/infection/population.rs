@@ -160,6 +160,8 @@ impl Building {
             size:           size
         };
 
+        println!("MAKING NEW BUILDING!");
+
         world.create_entity()
             .with(home)
             .with(location)
