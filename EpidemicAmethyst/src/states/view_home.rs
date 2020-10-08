@@ -50,9 +50,9 @@ impl SimpleState for ViewHomeState {
 
         let ui_text = UiText::new(
             font_handle, 
-            world.read_component::<population::Home>()
-                .get(self.home)
-                .expect("Failed to get Home component for Home").families().len().to_string(), 
+            "Working on it".to_owned(),  //  world.read_component::<population::Building>()
+                                        //    .get(self.home)
+                                        //    .expect("Failed to get Home component for Home").len().to_string(), 
             [1.0, 1.0, 1.0, 0.7], 
             25.0, 
             LineMode::Single, 

@@ -137,14 +137,11 @@ impl SimpleState for GameState {
                         if let Some(home) = self.check_home_location(world_location, state_data.world) {
                             println!("Is a home location!!");
                             println!("Home has {} families", 
-                                state_data.world.read_component::<infection::population::Home>()
-                                    .get(home)
-                                    .expect("Failed to get Home component for Home")
-                                    .families()
-                                    .len()  //home.families.len()
+                                "Working on it" //home.families.len()
                             );
 
-                            return Trans::Push(Box::new(states::view_home::ViewHomeState::new(home)))
+                            return Trans::None;
+                            //return Trans::Push(Box::new(states::view_home::ViewHomeState::new(home)))
                         }
                     }
                 }
@@ -163,22 +160,21 @@ impl SimpleState for GameState {
 
 impl GameState {
     fn check_home_location(&self, location: (f32, f32), world: &World) -> Option<Entity> {
-        for home in self.homes.clone() {
-
+        for home_ent in self.homes.clone() {
             let home_loc_comp = world.read_component::<infection::population::Location>();
-            let home_size_comp = world.read_component::<infection::population::Size>();
+            let home_comp = world.read_component::<infection::population::Building>();
 
             let home_location = home_loc_comp
-                .get(home)
+                .get(home_ent)
                 .expect("Failed to get location for Home");
             
-            let home_size = home_size_comp
-                .get(home)
+            let home = home_comp
+                .get(home_ent)
                 .expect("Failed to get Size for home");
 
             if (home_location.x() <= location.0) && (home_location.y() <= location.1) {
-                if ((home_location.x() + home_size.x()) > location.0) & ((home_location.y() + home_size.y()) > location.1) {
-                    return Some(home)
+                if ((home_location.x() + home.size[0]) > location.0) & ((home_location.y() + home.size[1]) > location.1) {
+                    return Some(home_ent)
                 }
             }
         }
@@ -194,15 +190,34 @@ impl GameState {
 
         if let Some(map) = &self.map {
             let map_size = (map.width as u64 * 32, map.height as u64 * 32);
+            let mut people_count = 0;
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
+                        //let people_count_prop = home_object.properties
+                        //    .get("peopleCount")
+                        //    .expect("No peopleCount variable found!");
+
+                        //if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
+                        //    people_count += int_val;
+                        //} else {
+                        //    panic!("Failed on getting person count!");
+                        //}
+
                         self.homes.push(
-                            infection::population::Home::new(home_object, map_size, world)
+                            infection::population::Building::new(home_object, map_size, world)
                         );
                     }
                 }
             }
+
+            //let mut people = Vec::<Entity>::new();
+            //for _person_int in 0..=people_count {
+            //    people.push(infection::population::Person::new(world));
+            //}
+
+            // Add people to homes and create relationships
+            
         }
     }
 
