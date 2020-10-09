@@ -136,8 +136,9 @@ impl SimpleState for GameState {
 
                         if let Some(home) = self.check_home_location(world_location, state_data.world) {
                             println!("Is a home location!!");
-                            println!("Home has {} families", 
-                                "Working on it" //home.families.len()
+                            println!("Home has {} maximum occupants", 
+                                state_data.world.read_component::<infection::population::Building>()
+                                    .get(home).expect("Failed to get building!").max_occupants
                             );
 
                             return Trans::None;
@@ -184,6 +185,8 @@ impl GameState {
     pub fn load_game_map(&mut self, world: &mut World) {
         world.register::<infection::population::Building>();
         world.register::<infection::population::Location>();
+        world.register::<infection::population::Person>();
+
         self.load_map(
             "../Map/MainTown.tmx",
             "../../Map",
@@ -196,15 +199,15 @@ impl GameState {
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
-                        //let people_count_prop = home_object.properties
-                        //    .get("peopleCount")
-                        //    .expect("No peopleCount variable found!");
+                        let people_count_prop = home_object.properties
+                            .get("peopleCount")
+                            .expect("No peopleCount variable found!");
 
-                        //if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
-                        //    people_count += int_val;
-                        //} else {
-                        //    panic!("Failed on getting person count!");
-                        //}
+                        if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
+                            people_count += int_val;
+                        } else {
+                            panic!("Failed on getting person count!");
+                        }
 
                         self.homes.push(
                             infection::population::Building::new(home_object, map_size, world)
@@ -213,10 +216,11 @@ impl GameState {
                 }
             }
 
-            //let mut people = Vec::<Entity>::new();
-            //for _person_int in 0..=people_count {
-            //    people.push(infection::population::Person::new(world));
-            //}
+            let mut people = Vec::<Entity>::new();
+            for _person_int in 0..=people_count {
+                people.push(infection::population::Person::new(world));
+            }
+            println!("Created {} people!", people_count);
 
             // Add people to homes and create relationships
             

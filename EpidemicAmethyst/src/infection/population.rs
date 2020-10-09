@@ -43,9 +43,9 @@ impl Location {
 }
 
 pub struct Building {
-    _id:            u32,
-    max_occupants:  u32,
-    pub size:       [f32; 2]
+    _id:                u32,
+    pub max_occupants:  u32,
+    pub size:           [f32; 2]
 }
 
 impl Component for Building {
@@ -159,8 +159,6 @@ impl Building {
             max_occupants:  max_occupant_count,
             size:           size
         };
-
-        println!("MAKING NEW BUILDING!");
 
         world.create_entity()
             .with(home)
