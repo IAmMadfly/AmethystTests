@@ -1,5 +1,3 @@
-use std::rc::{Rc, Weak};
-
 use amethyst::{
     prelude::*,
     ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage}
@@ -44,7 +42,7 @@ impl Location {
 
 pub struct Building {
     _id:                u32,
-    pub max_occupants:  u32,
+    pub max_occupants:  usize,
     pub size:           [f32; 2]
 }
 
@@ -58,6 +56,18 @@ pub struct Occupants {
 
 impl Component for Occupants {
     type Storage    = DenseVecStorage<Self>;
+}
+
+impl Occupants {
+    pub fn new() -> Self {
+        Occupants {
+            people:     Vec::new()
+        }
+    }
+
+    pub fn add(&mut self, person: Entity) {
+        self.people.push(person);
+    }
 }
 
 pub struct Family {
@@ -74,32 +84,6 @@ impl Family {
         // Should be a vector of Familiy Entities
         Vec::<Entity>::new()
     }
-
-    //fn make(fam_type: FamilyType, world: &mut World) -> Family {
-    //    match fam_type {
-    //        FamilyType::Single => {
-    //            return Family {
-    //                parents:    None,
-    //                fam_type:   fam_type,
-    //                children:   Vec::<Entity>::new()
-    //            }
-    //        }
-    //        FamilyType::Partner => {
-    //            return Family {
-    //                parents:    None,
-    //                fam_type:   fam_type,
-    //                children:   Vec::<Entity>::new()
-    //            }
-    //        }
-    //        FamilyType::Children => {
-    //            return Family {
-    //                parents:    None,
-    //                fam_type:   fam_type,
-    //                children:   Family::make_rand_children(world)
-    //            }
-    //        }
-    //    }
-    //}
 }
 
 pub struct Person {
@@ -115,10 +99,8 @@ impl Component for Person {
 
 impl Person {
     pub fn new(world: &mut World) -> Entity {
-        let mut gen = Generator::with_naming(Name::Plain);
-
         let person = Person {
-            name:       gen.next().unwrap(),
+            name:       Person::generate_random_name(),
             sex:        rand_sex(),
             age:        rand::random(),
             infection:  None
@@ -128,18 +110,49 @@ impl Person {
             .with(person)
             .build()
     }
+
+    pub fn new_with_residence(residence_ent: Entity, world: &mut World) -> Entity {
+        let person = Person {
+            name:       Person::generate_random_name(),
+            sex:        rand_sex(),
+            age:        rand::random(),
+            infection:  None
+        };
+
+        let residence = Residence {
+            home:       residence_ent
+        };
+
+        world.create_entity()
+            .with(person)
+            .with(residence)
+            .build()
+    }
+
+    fn generate_random_name() -> String {
+        let mut gen = Generator::with_naming(Name::Plain);
+        gen.next().unwrap()
+    }
+}
+
+pub struct Residence {
+    home:       Entity
+}
+
+impl Component for Residence {
+    type Storage = DenseVecStorage<Self>;
 }
 
 impl Building {
     pub fn new(home_data: &tiled::Object, map_size: (u64, u64), world: &mut World) -> Entity {
-        let max_occupant_count;
+        let max_occupant_count: usize;
         let prop_val =          home_data
                                     .properties
                                     .get("peopleCount")
                                     .expect("Object did not have 'peopleCount' property!");
         
         if let tiled::PropertyValue::IntValue(int_val) = prop_val {
-            max_occupant_count = *int_val as u32;
+            max_occupant_count = *int_val as usize;
         } else {
             println!("Failed to find 'peopleCount' integer, getting random number!");
             max_occupant_count =  rand::thread_rng().gen_range(3, 25);

@@ -2,15 +2,14 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::{
         transform::Transform,
-        math::{Vector3, Vector2, Point3, Point2}
+        math::{Vector3, Vector2, Point3},
+        timing
     },
     prelude::*,
     ecs::prelude::{Entity, Component, DenseVecStorage},
     input::{self, InputEvent},
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
-        debug_drawing,
-        palette::Srgba,
         rendy::{wsi::winit::MouseButton},
         Camera, ImageFormat, Texture},
     window::{ScreenDimensions},
@@ -61,6 +60,7 @@ pub enum PlayStateEnum {
 pub struct GameState {
     map:            Option<tiled::Map>,
     homes:          Vec<Entity>,
+    people:         Vec<Entity>,
     camera:         Option<Entity>,
     play_state:     Option<PlayStateEnum>
 }
@@ -69,7 +69,8 @@ impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            homes:          Vec::<Entity>::new(),
+            homes:          Vec::new(),
+            people:         Vec::new(),
             camera:         None,
             play_state:     None
         }
@@ -153,8 +154,9 @@ impl SimpleState for GameState {
         }
     }
 
-    fn update(&mut self, _: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+    fn update(&mut self, state_data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         //println!("Updating GameState!");
+        state_data.world.read_resource::<timing::Time>()
         Trans::None
     }
 }
@@ -186,6 +188,8 @@ impl GameState {
         world.register::<infection::population::Building>();
         world.register::<infection::population::Location>();
         world.register::<infection::population::Person>();
+        world.register::<infection::population::Occupants>();
+        world.register::<infection::population::Residence>();
 
         self.load_map(
             "../Map/MainTown.tmx",
@@ -209,21 +213,42 @@ impl GameState {
                             panic!("Failed on getting person count!");
                         }
 
-                        self.homes.push(
-                            infection::population::Building::new(home_object, map_size, world)
+                        let home  = infection::population::Building::new(
+                            home_object, 
+                            map_size, 
+                            world
                         );
+                        self.homes.push(
+                            home.clone()
+                        );
+                        
+                        let max_occupants = world
+                            .read_component::<infection::population::Building>()
+                            .get(home).expect("Failed to get building component").max_occupants;
+
+                        let mut occupants = infection::population::Occupants::new();
+
+                        for _ in 0..max_occupants {
+                            let new_person = infection::population::Person::new_with_residence(
+                                home.clone(),
+                                world
+                            );
+                            self.people.push(new_person);
+                            occupants.add(new_person.clone());
+                        }
+
+                        let res = world
+                            .write_storage::<infection::population::Occupants>()
+                            .insert(home, occupants);
+                        
+                        if let Err(er) = res {
+                            println!("Failed to add Occupants to buildings! Error: {}", er);
+                        }
+                        
                     }
                 }
             }
-
-            let mut people = Vec::<Entity>::new();
-            for _person_int in 0..=people_count {
-                people.push(infection::population::Person::new(world));
-            }
-            println!("Created {} people!", people_count);
-
-            // Add people to homes and create relationships
-            
+            println!("Created {} people!", self.people.len());
         }
     }
 
