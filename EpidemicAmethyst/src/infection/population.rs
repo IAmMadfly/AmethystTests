@@ -70,22 +70,6 @@ impl Occupants {
     }
 }
 
-pub struct Family {
-    parents:        Option<[Entity; 2]>,
-    children:       Vec<Entity>
-}
-
-impl Component for Family {
-    type Storage    = DenseVecStorage<Self>;
-}
-
-impl Family {
-    fn generate_families(max_occupant_count: u32, world: &mut World) -> Vec<Entity> {
-        // Should be a vector of Familiy Entities
-        Vec::<Entity>::new()
-    }
-}
-
 pub struct Person {
     name:           String,
     sex:            Sex,

@@ -79,6 +79,7 @@ impl Default for GameState {
 
 impl SimpleState for GameState {
     fn on_start(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
+        
         println!("-- Game is starting!! --");
         let world = _data.world;
 
@@ -86,6 +87,7 @@ impl SimpleState for GameState {
         //world.register::<CameraMovementSystem>();
 
         self.camera = Some(init_camera(world));
+        world.write_resource::<timing::Time>().set_time_scale(10.0);
     }
 
     fn handle_event(&mut self, state_data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -156,7 +158,13 @@ impl SimpleState for GameState {
 
     fn update(&mut self, state_data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         //println!("Updating GameState!");
-        state_data.world.read_resource::<timing::Time>()
+        let time = state_data.world.read_resource::<timing::Time>();
+
+        println!("Time is: {}, vs {}", 
+            time.absolute_time().as_secs_f32(), 
+            time.absolute_real_time().as_secs_f32()
+        );
+
         Trans::None
     }
 }
