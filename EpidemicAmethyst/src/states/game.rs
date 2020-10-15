@@ -140,7 +140,7 @@ impl SimpleState for GameState {
                         if let Some(home) = self.check_home_location(world_location, state_data.world) {
                             println!("Is a home location!!");
                             println!("Home has {} maximum occupants", 
-                                state_data.world.read_component::<infection::population::Building>()
+                                state_data.world.read_component::<infection::buildings::Building>()
                                     .get(home).expect("Failed to get building!").max_occupants
                             );
 
@@ -172,8 +172,8 @@ impl SimpleState for GameState {
 impl GameState {
     fn check_home_location(&self, location: (f32, f32), world: &World) -> Option<Entity> {
         for home_ent in self.homes.clone() {
-            let home_loc_comp = world.read_component::<infection::population::Location>();
-            let home_comp = world.read_component::<infection::population::Building>();
+            let home_loc_comp = world.read_component::<infection::buildings::Location>();
+            let home_comp = world.read_component::<infection::buildings::Building>();
 
             let home_location = home_loc_comp
                 .get(home_ent)
@@ -193,8 +193,8 @@ impl GameState {
     }
     
     pub fn load_game_map(&mut self, world: &mut World) {
-        world.register::<infection::population::Building>();
-        world.register::<infection::population::Location>();
+        world.register::<infection::buildings::Building>();
+        world.register::<infection::buildings::Location>();
         world.register::<infection::population::Person>();
         world.register::<infection::population::Occupants>();
         world.register::<infection::population::Residence>();
@@ -221,7 +221,7 @@ impl GameState {
                             panic!("Failed on getting person count!");
                         }
 
-                        let home  = infection::population::Building::new(
+                        let home  = infection::buildings::Building::new(
                             home_object, 
                             map_size, 
                             world
@@ -231,7 +231,7 @@ impl GameState {
                         );
                         
                         let max_occupants = world
-                            .read_component::<infection::population::Building>()
+                            .read_component::<infection::buildings::Building>()
                             .get(home).expect("Failed to get building component").max_occupants;
 
                         let mut occupants = infection::population::Occupants::new();
@@ -253,6 +253,16 @@ impl GameState {
                             println!("Failed to add Occupants to buildings! Error: {}", er);
                         }
                         
+                    }
+                }
+
+                if object_group.name == "WorkPlaces" {
+                    for work_building in &object_group.objects {
+                        let building  = infection::buildings::Building::new(
+                            work_building, 
+                            map_size, 
+                            world
+                        );
                     }
                 }
             }
