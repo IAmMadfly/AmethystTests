@@ -23,7 +23,11 @@ use std::{
     fs::File
     };
 
-use tiled::parse;
+use rand::Rng;
+use tiled::{
+    ObjectShape,
+    parse
+};
 
 use crate::states;
 use crate::infection;
@@ -140,8 +144,8 @@ impl SimpleState for GameState {
                         if let Some(home) = self.check_home_location(world_location, state_data.world) {
                             println!("Is a home location!!");
                             println!("Home has {} maximum occupants", 
-                                state_data.world.read_component::<infection::buildings::Building>()
-                                    .get(home).expect("Failed to get building!").max_occupants
+                                state_data.world.read_component::<infection::buildings::MaxOccupants>()
+                                    .get(home).expect("Failed to get building!").get_max_occupants()
                             );
 
                             return Trans::None;
@@ -194,6 +198,7 @@ impl GameState {
     
     pub fn load_game_map(&mut self, world: &mut World) {
         world.register::<infection::buildings::Building>();
+        world.register::<infection::buildings::BuildingEntrance>();
         world.register::<infection::buildings::Location>();
         world.register::<infection::population::Person>();
         world.register::<infection::population::Occupants>();
@@ -208,61 +213,138 @@ impl GameState {
         if let Some(map) = &self.map {
             let map_size = (map.width as u64 * 32, map.height as u64 * 32);
             let mut people_count = 0;
+            let mut house_entrance: Vec<infection::buildings::BuildingEntrance> = Vec::new();
+            let mut work_entrance: Vec<infection::buildings::BuildingEntrance> = Vec::new();
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {
-                        let people_count_prop = home_object.properties
-                            .get("peopleCount")
-                            .expect("No peopleCount variable found!");
+                        match home_object.shape {
+                            ObjectShape::Rect { width, height } => {
+                                let people_count_prop = home_object.properties
+                                    .get("peopleCount")
+                                    .expect("No peopleCount variable found!");
 
-                        if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
-                            people_count += int_val;
-                        } else {
-                            panic!("Failed on getting person count!");
+                                if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
+                                    people_count += int_val;
+                                } else {
+                                    panic!("Failed on getting person count!");
+                                }
+
+                                let home = {
+                                    let max_occupant_count: usize;
+                                    let prop_val = home_object
+                                                                .properties
+                                                                .get("peopleCount")
+                                                                .expect("Object did not have 'peopleCount' property!");
+                                    
+                                    if let tiled::PropertyValue::IntValue(int_val) = prop_val {
+                                        max_occupant_count = *int_val as usize;
+                                    } else {
+                                        println!("Failed to find 'peopleCount' integer, getting random number!");
+                                        max_occupant_count =  rand::thread_rng().gen_range(3, 25);
+                                    }
+
+                                    println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
+
+                                    let size = [(home_object.width/32.0).round(), (home_object.height/32.0).round()];
+
+                                    let location = infection::buildings::Location::new(
+                                        (home_object.x/32.0).round(),
+                                        ((map_size.1 as f32 - home_object.y)/32.0).round() - size[1]);
+
+                                    let max_occupants = infection::buildings::MaxOccupants::new(
+                                        max_occupant_count
+                                    );
+
+                                    let building = infection::buildings::Building::new(home_object.id, size);
+
+                                    world.create_entity()
+                                        .with(building)
+                                        .with(location)
+                                        .with(max_occupants)
+                                        .build()
+                                };
+
+                                self.homes.push(
+                                    home.clone()
+                                );
+                                
+                                let max_occupants = world
+                                    .read_component::<infection::buildings::MaxOccupants>()
+                                    .get(home)
+                                    .expect("Failed to get building component")
+                                    .get_max_occupants();
+
+                                let mut occupants = infection::population::Occupants::new();
+
+                                for _ in 0..max_occupants {
+                                    let new_person = infection::population::Person::new_with_residence(
+                                        home.clone(),
+                                        world
+                                    );
+                                    self.people.push(new_person);
+                                    occupants.add(new_person.clone());
+                                }
+
+                                let res = world
+                                    .write_storage::<infection::population::Occupants>()
+                                    .insert(home, occupants);
+                                
+                                if let Err(er) = res {
+                                    println!("Failed to add Occupants to buildings! Error: {}", er);
+                                }
+                            }
+                            ObjectShape::Point(x, y) => {
+                                let location = infection::buildings::Location::new(
+                                    (x/32.0).round(), 
+                                    (y/32.0).round()
+                                );
+
+                                house_entrance.push(
+                                    infection::buildings::BuildingEntrance::new(location)
+                                );
+                            }
+                            _ => println!("Unknown shape for home building!")
                         }
-
-                        let home  = infection::buildings::Building::new(
-                            home_object, 
-                            map_size, 
-                            world
-                        );
-                        self.homes.push(
-                            home.clone()
-                        );
-                        
-                        let max_occupants = world
-                            .read_component::<infection::buildings::Building>()
-                            .get(home).expect("Failed to get building component").max_occupants;
-
-                        let mut occupants = infection::population::Occupants::new();
-
-                        for _ in 0..max_occupants {
-                            let new_person = infection::population::Person::new_with_residence(
-                                home.clone(),
-                                world
-                            );
-                            self.people.push(new_person);
-                            occupants.add(new_person.clone());
-                        }
-
-                        let res = world
-                            .write_storage::<infection::population::Occupants>()
-                            .insert(home, occupants);
-                        
-                        if let Err(er) = res {
-                            println!("Failed to add Occupants to buildings! Error: {}", er);
-                        }
-                        
                     }
                 }
 
                 if object_group.name == "WorkPlaces" {
                     for work_building in &object_group.objects {
-                        let building  = infection::buildings::Building::new(
-                            work_building, 
-                            map_size, 
-                            world
-                        );
+                        match work_building.shape {
+                            ObjectShape::Rect {width, height} => {
+                                let building_ent  = {
+
+                                    let size = [
+                                        (width/32.0).round(), 
+                                        (height/32.0).round()
+                                    ];
+        
+                                    let location = infection::buildings::Location::new(
+                                        (work_building.x/32.0).round(), 
+                                        ((map_size.1 as f32 - work_building.y)/32.0).round() - size[1]
+                                    );
+                                    
+                                    let building = infection::buildings::Building::new(work_building.id, size);
+        
+                                    world.create_entity()
+                                        .with(building)
+                                        .with(location)
+                                        .build()
+                                };
+                            }
+                            ObjectShape::Point(x, y) => {
+                                let location = infection::buildings::Location::new(
+                                    (x/32.0).round(), 
+                                    (y/32.0).round()
+                                );
+
+                                work_entrance.push(
+                                    infection::buildings::BuildingEntrance::new(location)
+                                );
+                            }
+                            _ => println!("Unrecognised map shape!")
+                        }
                     }
                 }
             }
@@ -446,7 +528,14 @@ impl GameState {
             if !layer.visible {
                 continue
             }
-            for (y, row) in layer.tiles.iter().rev().enumerate().clone() {
+            let layer_tiles: Vec<Vec<tiled::LayerTile>>;
+            // Only load Finite data
+            if let tiled::LayerData::Finite(data) = &layer.tiles {
+                layer_tiles = data.clone();
+            } else {
+                continue;
+            }
+            for (y, row) in layer_tiles.iter().rev().enumerate().clone() {
                 for (x, &tile) in row.iter().enumerate() {
                     // Do nothing with empty tiles
                     if tile.gid == 0 {
@@ -484,12 +573,6 @@ impl GameState {
                     // Alternatively could use the Sprite offsets instead: [-32.0, 32.0]. Depends on the use case I guess.
                     let offset_x = tile_width as f32/2.0;
                     let offset_y = -tile_height as f32/2.0;
-    
-                    //println!(
-                    //    "Tile\tx pos: {},\ty pos: {}", 
-                    //    offset_x + x_coord as f32, 
-                    //    offset_y + y_coord as f32
-                    //);
                     
                     tile_transform.set_translation_xyz(
                         offset_x + x_coord as f32,
