@@ -63,7 +63,8 @@ pub enum PlayStateEnum {
 
 pub struct GameState {
     map:            Option<tiled::Map>,
-    homes:          Vec<Entity>,
+    houses:         Vec<Entity>,
+    workplaces:     Vec<Entity>,
     people:         Vec<Entity>,
     camera:         Option<Entity>,
     play_state:     Option<PlayStateEnum>
@@ -73,7 +74,8 @@ impl Default for GameState {
     fn default() -> Self {
         GameState{
             map:            None,
-            homes:          Vec::new(),
+            houses:         Vec::new(),
+            workplaces:     Vec::new(),
             people:         Vec::new(),
             camera:         None,
             play_state:     None
@@ -175,7 +177,7 @@ impl SimpleState for GameState {
 
 impl GameState {
     fn check_home_location(&self, location: (f32, f32), world: &World) -> Option<Entity> {
-        for home_ent in self.homes.clone() {
+        for home_ent in self.houses.clone() {
             let home_loc_comp = world.read_component::<infection::buildings::Location>();
             let home_comp = world.read_component::<infection::buildings::Building>();
 
@@ -199,6 +201,7 @@ impl GameState {
     pub fn load_game_map(&mut self, world: &mut World) {
         world.register::<infection::buildings::Building>();
         world.register::<infection::buildings::BuildingEntrance>();
+        world.register::<infection::buildings::MaxOccupants>();
         world.register::<infection::buildings::Location>();
         world.register::<infection::population::Person>();
         world.register::<infection::population::Occupants>();
@@ -246,7 +249,7 @@ impl GameState {
 
                                     println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
 
-                                    let size = [(home_object.width/32.0).round(), (home_object.height/32.0).round()];
+                                    let size = [(width/32.0).round(), (height/32.0).round()];
 
                                     let location = infection::buildings::Location::new(
                                         (home_object.x/32.0).round(),
@@ -265,7 +268,7 @@ impl GameState {
                                         .build()
                                 };
 
-                                self.homes.push(
+                                self.houses.push(
                                     home.clone()
                                 );
                                 
@@ -297,7 +300,7 @@ impl GameState {
                             ObjectShape::Point(x, y) => {
                                 let location = infection::buildings::Location::new(
                                     (x/32.0).round(), 
-                                    (y/32.0).round()
+                                    map.height as f32 - (y/32.0).round()
                                 );
 
                                 house_entrance.push(
@@ -325,18 +328,23 @@ impl GameState {
                                         ((map_size.1 as f32 - work_building.y)/32.0).round() - size[1]
                                     );
                                     
-                                    let building = infection::buildings::Building::new(work_building.id, size);
+                                    let building = infection::buildings::Building::new(
+                                        work_building.id, 
+                                        size
+                                    );
         
                                     world.create_entity()
                                         .with(building)
                                         .with(location)
                                         .build()
                                 };
+
+                                self.workplaces.push(building_ent);
                             }
                             ObjectShape::Point(x, y) => {
                                 let location = infection::buildings::Location::new(
                                     (x/32.0).round(), 
-                                    (y/32.0).round()
+                                    map.height as f32 - (y/32.0).round()
                                 );
 
                                 work_entrance.push(
@@ -344,6 +352,71 @@ impl GameState {
                                 );
                             }
                             _ => println!("Unrecognised map shape!")
+                        }
+                    }
+                }
+            }
+            // Start loading entrances on buildings
+            println!("Got {} building entrances for {} workplaces", 
+                work_entrance.len(), 
+                self.workplaces.len()
+            );
+            for entrance in work_entrance {
+                for building_ent in &self.workplaces {
+                    let location_getter = world
+                        .read_component::<infection::buildings::Location>();
+                    let building_getter = world
+                        .read_component::<infection::buildings::Building>();
+                    
+                    let building_location = location_getter.get(*building_ent)
+                        .expect("Failed to get buiilding location!");
+                    let building = building_getter.get(*building_ent)
+                        .expect("Failed to get buiilding!");
+                    
+                    // If location of entrance is not i less (on Y) than building, go to next building
+                    if &entrance.location.y() == &(building_location.y() - 1.0) {
+                        
+                        if (&entrance.location.x() >= &building_location.x()) && 
+                           (&entrance.location.x() < &(building_location.x()+building.size[0])) {
+                            let insert = world
+                                .write_component::<infection::buildings::BuildingEntrance>()
+                                .insert(*building_ent, entrance.clone());
+                            
+                            if let Err(er) = insert {
+                                println!("Failed to add entrance to building! Error: {}", er);
+                            }
+                        }
+                    }
+                }
+            }
+            println!("Got {} building entrances for {} houses", 
+                house_entrance.len(), 
+                self.houses.len()
+            );
+            for entrance in house_entrance {
+                for building_ent in &self.houses {
+                    let location_getter = world
+                        .read_component::<infection::buildings::Location>();
+                    let building_getter = world
+                        .read_component::<infection::buildings::Building>();
+                    
+                    let building_location = location_getter.get(*building_ent)
+                        .expect("Failed to get buiilding location!");
+                    let building = building_getter.get(*building_ent)
+                        .expect("Failed to get buiilding!");
+                    
+                    // If location of entrance is not i less (on Y) than building, go to next building
+                    if &entrance.location.y() == &(building_location.y() - 1.0) {
+                        
+                        if (&entrance.location.x() >= &building_location.x()) && 
+                           (&entrance.location.x() < &(building_location.x()+building.size[0])) {
+                            let insert = world
+                                .write_component::<infection::buildings::BuildingEntrance>()
+                                .insert(*building_ent, entrance.clone());
+                            
+                            if let Err(er) = insert {
+                                println!("Failed to add entrance to building! Error: {}", er);
+                            }
                         }
                     }
                 }

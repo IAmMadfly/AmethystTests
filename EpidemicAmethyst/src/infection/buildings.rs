@@ -14,6 +14,15 @@ impl Component for Location {
     type Storage = DenseVecStorage<Self>;
 }
 
+impl Clone for Location {
+    fn clone(&self) -> Self {
+        Location {
+            x:  self.x,
+            y:  self.y
+        }
+    }
+}
+
 impl Location {
     pub fn new (x: f32, y: f32) -> Self {
         Location {
@@ -50,11 +59,19 @@ impl Building {
 }
 
 pub struct BuildingEntrance {
-    location:   Location
+    pub location:   Location
 }
 
 impl Component for BuildingEntrance {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl Clone for BuildingEntrance {
+    fn clone(&self) -> Self {
+        BuildingEntrance {
+            location:   self.location.clone()
+        }
+    }
 }
 
 impl BuildingEntrance {
