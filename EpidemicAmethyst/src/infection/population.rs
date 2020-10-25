@@ -5,6 +5,7 @@ use amethyst::{
 
 use names::{Generator, Name};
 use crate::infection::infection;
+use crate::infection::buildings;
 
 #[derive(Debug)]
 enum Sex {
@@ -95,4 +96,8 @@ pub struct Residence {
 
 impl Component for Residence {
     type Storage = DenseVecStorage<Self>;
+}
+
+pub struct PathMaker {
+    path_blocks:    Vec<buildings::Location>
 }

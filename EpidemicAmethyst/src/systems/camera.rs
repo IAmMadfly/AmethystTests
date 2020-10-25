@@ -39,13 +39,15 @@ impl<'s> System<'s> for CameraMovementSystem {
     );
 
     fn run(&mut self, (mut camera, mut transforms, input_handler, game_play_state): Self::SystemData) {
+        let mut run_system = false;
         if let Some(play_state) = game_play_state {
             match *play_state {
-                game::PlayStateEnum::Paused => return,
-                game::PlayStateEnum::InGame => println!("Running!")
+                game::PlayStateEnum::Paused => run_system = false,
+                game::PlayStateEnum::InGame => run_system = true
             }
-        } else {
-            println!("No gamestate found!");
+        }
+
+        if !run_system {
             return
         }
 

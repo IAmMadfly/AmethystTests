@@ -31,6 +31,14 @@ impl Location {
         }
     }
 
+    pub fn block_x(&self) -> u32 {
+        (self.x/32.0).floor() as u32
+    }
+
+    pub fn block_y(&self) -> u32 {
+        (self.y/32.0).floor() as u32
+    }
+
     pub fn x(&self) -> f32 {
         self.x
     }
