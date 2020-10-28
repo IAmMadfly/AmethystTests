@@ -1098,6 +1098,7 @@ version = "0.1.0"
 dependencies = [
  "amethyst",
  "names",
+ "pathfinding",
  "rand 0.7.3",
  "rendy 0.5.1",
  "shred",
@@ -1177,6 +1178,12 @@ dependencies = [
  "colored",
  "log",
 ]
+
+[[package]]
+name = "fixedbitset"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "float-ord"
@@ -1542,6 +1549,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "hashbrown"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
+
+[[package]]
 name = "heck"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1623,6 +1636,16 @@ dependencies = [
  "num-rational 0.3.0",
  "num-traits 0.2.12",
  "png 0.16.7",
+]
+
+[[package]]
+name = "indexmap"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55e2e4c765aa53a0424761bf9f41aa7a6ac1efa87238f59560640e27fca028f2"
+dependencies = [
+ "autocfg 1.0.0",
+ "hashbrown 0.9.1",
 ]
 
 [[package]]
@@ -2372,6 +2395,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b9281a268ec213237dcd2aa3c3d0f46681b04ced37c1616fd36567a9e6954b0"
 dependencies = [
  "proc-macro-hack",
+]
+
+[[package]]
+name = "pathfinding"
+version = "2.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86f4d8cc85ca67860ef4324faf86973a39e4e1c78338987eda29a8e6b6ec0c0e"
+dependencies = [
+ "fixedbitset",
+ "indexmap",
+ "itertools 0.8.2",
+ "num-traits 0.2.12",
 ]
 
 [[package]]
@@ -3654,7 +3689,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5f08237e667ac94ad20f8878b5943d91a93ccb231428446c57c21c57779016d"
 dependencies = [
  "arrayvec 0.5.1",
- "hashbrown",
+ "hashbrown 0.7.2",
  "mopa",
  "rayon",
  "shred-derive",
@@ -3745,7 +3780,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fff28a29366aff703d5da8a7e2c8875dc8453ac1118f842cbc0fa70c7db51240"
 dependencies = [
  "crossbeam-queue 0.2.3",
- "hashbrown",
+ "hashbrown 0.7.2",
  "hibitset",
  "log",
  "rayon",

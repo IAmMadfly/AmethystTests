@@ -31,6 +31,7 @@ use tiled::{
 
 use crate::states;
 use crate::infection;
+use crate::tools;
 
 #[derive(Clone)]
 pub struct AnimatedSprite {
@@ -61,70 +62,6 @@ pub enum PlayStateEnum {
     InGame
 }
 
-struct PathPlanner {
-    map:    Vec<Vec<u32>> 
-    // map[y][x], This makes it easier for debugging purposes, 
-    // as printing in x direction i s natural
-}
-
-impl PathPlanner {
-    fn default() -> Self {
-        PathPlanner {
-            map:    Vec::new()
-        }
-    }
-
-    fn allocate_map_size(&mut self, size: (u32, u32)) {
-        self.map = vec![vec![0; size.1 as usize]; size.0 as usize];
-    }
-
-    fn add_allowable_blocks(&mut self, location: (u32, u32), size: (u32, u32)) {
-        let start_x     = location.0 as usize;
-        let start_y     = location.1 as usize;
-        let end_x       = (location.0 + size.0) as usize;
-        let end_y       = (location.1 + size.1) as usize;
-
-        println!("Adding allowable path to map. Location: {:?}, Size: {:?}", location, size);
-
-        for x  in start_x..end_x {
-            for y in start_y..end_y {
-                self.map[y][x] = 1;
-            }
-        }
-    }
-
-    fn plan_path(&self, start: (usize, usize), end: (usize, usize)) -> Option<Vec<(usize, usize)>> {
-        let mut paths = Vec::<Vec<(usize, usize)>>::new();
-
-        if self.map[start.0][start.1] != 1 || self.map[end.0][end.1] != 1 {
-            return None
-        }
-
-        // Add starting point of path
-        paths.push(vec![start]);
-
-        // loop {
-            for path in &paths {
-                if self.map[path[path.len()-1].0][path[path.len()-1].1 + 1] == 1 {
-
-                }
-            }
-        // }
-
-        Some(Vec::<(usize, usize)>::new())
-    }
-
-    fn _debug_map(&self) {
-        for x in self.map.iter() {
-            for y in x.iter() {
-                
-                print!("{},", y);
-            }
-            println!();
-        }
-    }
-}
-
 pub struct GameState {
     map:            Option<tiled::Map>,
     houses:         Vec<Entity>,
@@ -132,7 +69,7 @@ pub struct GameState {
     people:         Vec<Entity>,
     camera:         Option<Entity>,
     play_state:     Option<PlayStateEnum>,
-    path_planner:   PathPlanner
+    path_planner:   tools::path_planner::PathPlanner
 }
 
 impl Default for GameState {
@@ -144,7 +81,7 @@ impl Default for GameState {
             people:         Vec::new(),
             camera:         None,
             play_state:     None,
-            path_planner:   PathPlanner::default()
+            path_planner:   tools::path_planner::PathPlanner::default()
         }
     }
 }
@@ -281,7 +218,6 @@ impl GameState {
 
         if let Some(map) = &self.map {
             // Create new Path planner map (give it the new size)
-            self.path_planner.allocate_map_size((map.width, map.height));
             // Load all elements of map (building locations, people counts)
             let map_size = (map.width as u64 * 32, map.height as u64 * 32);
             let mut people_count = 0;
@@ -436,7 +372,7 @@ impl GameState {
                             (walking_path.height/32.0).ceil() as u32
                         );
 
-                        self.path_planner.add_allowable_blocks(loc, size);
+                        self.path_planner.add_path_blocks(loc, size);
                     }
                 }
             }
