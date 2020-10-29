@@ -69,7 +69,7 @@ pub struct GameState {
     people:         Vec<Entity>,
     camera:         Option<Entity>,
     play_state:     Option<PlayStateEnum>,
-    path_planner:   tools::path_planner::PathPlanner
+    path_planner:   Option<tools::path_planner::PathPlanner>
 }
 
 impl Default for GameState {
@@ -81,7 +81,7 @@ impl Default for GameState {
             people:         Vec::new(),
             camera:         None,
             play_state:     None,
-            path_planner:   tools::path_planner::PathPlanner::default()
+            path_planner:   None
         }
     }
 }
@@ -371,8 +371,10 @@ impl GameState {
                             (walking_path.width/32.0).ceil() as u32, 
                             (walking_path.height/32.0).ceil() as u32
                         );
-
-                        self.path_planner.add_path_blocks(loc, size);
+                        if let Some(planner) = &self.path_planner {
+                            planner
+                                .add_path_blocks(loc, size);
+                        }
                     }
                 }
             }
@@ -442,7 +444,6 @@ impl GameState {
                 }
             }
             println!("Created {} people!", self.people.len());
-            self.path_planner._debug_map();
         }
     }
 
