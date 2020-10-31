@@ -6,6 +6,14 @@ struct PathPoint {
     valid:  bool
 }
 
+impl Clone for PathPoint {
+    fn clone(&self) -> Self {
+        PathPoint {
+            valid:  self.valid
+        }
+    }
+}
+
 impl Default for PathPoint {
     fn default() -> Self {
         PathPoint {
@@ -22,20 +30,14 @@ pub struct PathPlanner {
 
 impl PathPlanner {
     pub fn new(size: (usize, usize)) -> Self {
-        let mut y_vec = Vec::with_capacity(size.1);
+        println!("New map size: {}, {}", size.0, size.1);
+        
+        let default_path_point = PathPoint{valid: true};
 
-        let mut planner = 
+        let planner = 
             PathPlanner {
-                map:    y_vec
+                map:    vec![vec![default_path_point.clone(); size.0]; size.1]
             };
-
-        for y_index in 0..(size.1 - 1) {
-            planner.map[y_index] = Vec::with_capacity(size.0);
-
-            for x_index in 0..(size.0 - 1) {
-                planner.map[y_index][x_index] = PathPoint::default();
-            }
-        }
 
         planner
     }
@@ -64,13 +66,22 @@ impl PathPlanner {
     }
 
     pub fn plan_path(&self, start: (usize, usize), end: (usize, usize)) -> Option<Vec<(usize, usize)>> {
-        
 
-
-        Some(Vec::<(usize, usize)>::new())
+        None
     }
 
     pub fn _debug_map(&self) {
+        println!("Printing path map!");
         
+        for y in &self.map {
+            for x in y {
+                if x.valid {
+                    print!("x");
+                } else {
+                    print!(" ")
+                }
+            }
+            println!();
+        }
     }
 }

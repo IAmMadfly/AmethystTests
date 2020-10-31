@@ -1,10 +1,32 @@
 use amethyst::{
-    ecs::{Component, Join, Read, ReadExpect, System, VecStorage, WriteStorage},
+    ecs::{Component, Join, Read, System, DenseVecStorage, WriteStorage},
     core::timing::Time,
     renderer::SpriteRender
 };
 
-use crate::states::game;
+#[derive(Clone)]
+pub struct AnimatedSprite {
+    pub animation_data:     Vec<tiled::Frame>,
+    pub curr_index:         usize,
+    pub curr_duration:      std::time::Duration
+}
+
+impl AnimatedSprite {
+    pub fn new(data: Vec<tiled::Frame>) -> Self {
+        if data.is_empty() {
+            panic!("Cannot construct AnimatedSprite with no animation data");
+        }
+        AnimatedSprite {
+            animation_data:     data,
+            curr_index:         0,
+            curr_duration:      std::time::Duration::new(0, 0)
+        }
+    }
+}
+
+impl Component for AnimatedSprite {
+    type Storage = DenseVecStorage<Self>;
+}
 
 pub struct SpriteAnimationSystem {
     prev_time:      std::time::SystemTime
@@ -21,7 +43,7 @@ impl Default for SpriteAnimationSystem {
 impl<'s> System<'s> for SpriteAnimationSystem {
     type SystemData = (
         WriteStorage<'s, SpriteRender>,
-        WriteStorage<'s, game::AnimatedSprite>,
+        WriteStorage<'s, AnimatedSprite>,
         Read<'s, Time>
     );
 

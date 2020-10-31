@@ -7,11 +7,13 @@ use amethyst::{
 };
 
 use crate::states::game;
-use crate::tools::passer;
-use std::thread;
+use crate::tools::{
+    passer,
+    builder
+};
 
 pub struct WelcomeState {
-    game_loader:    passer::Passer<game::GameState>,
+    game_loader:    passer::Passer<builder::GameStateBuilder>,
     ui_handle:      Option<Entity>,
     start_butt:     Option<Entity>
 }
@@ -19,7 +21,7 @@ pub struct WelcomeState {
 impl Default for WelcomeState {
     fn default() -> Self {
         WelcomeState {
-            game_loader:    passer::Passer::new(game::GameState::default()),
+            game_loader:    passer::Passer::new(builder::GameStateBuilder::default()),// passer::Passer::new(game::GameState::default()),
             ui_handle:      None,
             start_butt:     None
         }
@@ -36,10 +38,9 @@ impl SimpleState for WelcomeState {
         //game::load_game_map(world);
         if let Some(loader) = &self.game_loader.item {
             loader.borrow_mut().load_game_map(world);
+            loader.borrow_mut().init_camera(world);
         } else {
-            let mut game_state = game::GameState::default();
-            game_state.load_game_map(world);
-            self.game_loader = passer::Passer::new(game_state);
+            panic!("Code should never get here");
         }
     }
 
@@ -81,6 +82,7 @@ impl SimpleState for WelcomeState {
                             self.game_loader
                                 .return_val("Error getting game from RefCell")
                                 .expect("Failed to get preloaded game from option")
+                                .build()
                         )
                     )
                 }
