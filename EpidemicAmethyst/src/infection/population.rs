@@ -1,3 +1,5 @@
+use std::time;
+
 use amethyst::{
     prelude::*,
     ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage}
@@ -78,9 +80,16 @@ impl Person {
             home:       residence_ent
         };
 
+        let person_in_home = InBuilding {
+            building:   residence_ent,
+            start_time: time::Duration::new(0, 0)
+        };
+
+
         world.create_entity()
             .with(person)
             .with(residence)
+            .with(person_in_home)
             .build()
     }
 
@@ -98,6 +107,20 @@ impl Component for Residence {
     type Storage = DenseVecStorage<Self>;
 }
 
-pub struct PathMaker {
-    path_blocks:    Vec<buildings::Location>
+pub struct InBuilding {
+    building:       Entity,
+    start_time:     time::Duration
+}
+
+impl Component for InBuilding {
+    type Storage = DenseVecStorage<Self>;
+}
+
+pub struct Traveling {
+    location:       buildings::Location,
+    path_plan:      Vec<(u16, u16)>
+}
+
+impl Component for Traveling {
+    type Storage = DenseVecStorage<Self>;
 }
