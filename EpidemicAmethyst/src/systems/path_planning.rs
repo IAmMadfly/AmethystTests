@@ -9,8 +9,16 @@ use amethyst::{
 use crate::states::game;
 use crate::infection::population;
 
-struct PathPlanningSystem {
+pub struct PathPlanningSystem {
 
+}
+
+impl Default for PathPlanningSystem {
+    fn default() -> Self {
+        PathPlanningSystem {
+            
+        }
+    }
 }
 
 impl<'s> System<'s> for PathPlanningSystem {
@@ -23,7 +31,7 @@ impl<'s> System<'s> for PathPlanningSystem {
 
     fn run(&mut self, (people, mut inbuildings, mut travels, game_play_state): Self::SystemData) {
         for (person, inbuilding) in (&people, &mut inbuildings).join() {
-            
+
         }
     }
 }

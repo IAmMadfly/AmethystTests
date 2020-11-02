@@ -35,20 +35,32 @@ fn main() -> amethyst::Result<()> {
     //    .with_bindings_from_file(binding_config_path)
     //    .expect("Failed to get bindings file!");
 
+
+
     let game_data = GameDataBuilder::default()
         .with(
+            systems::time::GameTimeSystem::default(),
+            "game_time_system",
+            &[]
+        )
+        .with(
             systems::camera::CameraMovementSystem::default(),
-            "camera_movement",
+            "camera_movement_system",
             &[]
         )
         .with(
             systems::animation::SpriteAnimationSystem::default(),
-            "sprite_animation",
+            "sprite_animation_system",
+            &[]
+        )
+        .with(
+            systems::path_planning::PathPlanningSystem::default(),
+            "path_planning_system",
             &[]
         )
         .with(
             amethyst::utils::ortho_camera::CameraOrthoSystem::default(),
-            "ortho_camera",
+            "ortho_camera_system",
             &[]
         )
         .with_bundle(
