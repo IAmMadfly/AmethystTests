@@ -8,14 +8,10 @@ use amethyst::{
     window::ScreenDimensions
 };
 
-use shred::DynamicSystemData;
-
 use crate::states::game;
 
 pub struct CameraMovementSystem {
     prev_mouse_pos:         Option<(f32, f32)>,
-    camera_center:          [f32; 2],
-    camera_width:           f32,
     camera_scale:           f32
 }
 
@@ -23,8 +19,6 @@ impl Default for CameraMovementSystem {
     fn default() -> Self {
         CameraMovementSystem {
             prev_mouse_pos:     None,
-            camera_center:      [0.0, 0.0],
-            camera_width:       300.0,
             camera_scale:       1.0
         }
     }
