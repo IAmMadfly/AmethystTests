@@ -31,13 +31,15 @@ use crate::tools;
 use crate::systems::animation::AnimatedSprite;
 
 pub struct GameStateBuilder {
-    map:            Option<tiled::Map>,
-    houses:         Vec<Entity>,
-    workplaces:     Vec<Entity>,
-    people:         Vec<Entity>,
-    camera:         Option<Entity>,
-    play_state:     PlayStateEnum,
-    path_planner:   Option<tools::path_planner::PathPlanner>
+    map:                Option<tiled::Map>,
+    houses:             Vec<Entity>,
+    workplaces:         Vec<Entity>,
+    people:             Vec<Entity>,
+    camera:             Option<Entity>,
+    play_state:         PlayStateEnum,
+    path_planner:       Option<tools::path_planner::PathPlanner>,
+    male_spritesheet:   Option<Handle<Texture>>,
+    female_spritesheet: Option<Handle<Texture>>
 }
 
 impl Default for GameStateBuilder {
@@ -49,7 +51,9 @@ impl Default for GameStateBuilder {
             people:             Vec::new(),
             camera:             None,
             play_state:         PlayStateEnum::InGame,
-            path_planner:       None
+            path_planner:       None,
+            male_spritesheet:   None,
+            female_spritesheet: None
         }
     }
 }
@@ -95,12 +99,42 @@ impl GameStateBuilder {
         self.camera = Some(cam);
     }
 
+    fn load_people_sprites(
+        &mut self,
+        // tsx_rel_path: &str,
+        world: &mut World
+    ) {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+
+        let male_file = File::open("../Map/male_sprites.tsx");
+        let female_file = File::open("../Map/female_sprites.tsx");
+
+        let male_reader = BufReader::new(
+            male_file.expect("Failed to get male file")
+        );
+        let female_reader = BufReader::new(
+            female_file.expect("Failed to get male file")
+        );
+
+        let male_sheet = tiled::parse_tileset(
+            male_reader, 
+            0
+        ).expect("Failed to parse male tilesheet");
+
+        let female_sheet = tiled::parse_tileset(
+            female_reader, 
+            0
+        ).expect("Failed top parse female tilesheet");
+    }
+
     fn load_map(
         &mut self,
         map_path: &str, 
         image_rel_path: &str, 
         world: &mut World) {
         // Get texture handle for the tileset image
+        self.load_people_sprites(world);
         
         // Load the tiled map
         let file = File::open(&Path::new(map_path)).unwrap();
@@ -381,6 +415,7 @@ impl GameStateBuilder {
         world.register::<infection::population::Person>();
         world.register::<infection::population::Occupants>();
         world.register::<infection::population::Residence>();
+        world.register::<infection::population::Job>();
 
         self.load_map(
             "../Map/MainTown.tmx",
@@ -461,12 +496,17 @@ impl GameStateBuilder {
                                 let mut occupants = infection::population::Occupants::new();
 
                                 for _ in 0..max_occupants {
-                                    let new_person = infection::population::Person::new_with_residence(
-                                        home.clone(),
-                                        world
-                                    );
-                                    self.people.push(new_person);
-                                    occupants.add(new_person.clone());
+                                    // let new_person = infection::population::Person::new_with_residence(
+                                    //     home.clone(),
+                                    //     world
+                                    // );
+                                    let person = infection::population::Person::new_person();
+                                    let residence = infection::population::Residence::new(home.clone());
+
+                                    let person_ent = world.create_entity().with(person).with(residence).build();
+
+                                    self.people.push(person_ent);
+                                    occupants.add(person_ent.clone());
                                 }
 
                                 let res = world
@@ -620,6 +660,17 @@ impl GameStateBuilder {
                 }
             }
             println!("Created {} people!", self.people.len());
+            println!("Loading jobs for people!");
+
+            for person in &self.people {
+                let result = world
+                    .write_component::<infection::population::Job>()
+                    .insert(*person, infection::population::Job::new(self.workplaces[0]));
+
+                if let Err(er) = result {
+                    println!("Error occured during job allocation: {}", er);
+                }
+            }
         }
     }
 }

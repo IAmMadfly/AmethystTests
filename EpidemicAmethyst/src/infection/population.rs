@@ -53,17 +53,13 @@ impl Component for Person {
 }
 
 impl Person {
-    pub fn new(world: &mut World) -> Entity {
-        let person = Person {
+    pub fn new_person() -> Person {
+        Person {
             name:       Person::generate_random_name(),
             sex:        rand_sex(),
             age:        rand::random(),
             infection:  None
-        };
-
-        world.create_entity()
-            .with(person)
-            .build()
+        }
     }
 
     pub fn new_with_residence(residence_ent: Entity, world: &mut World) -> Entity {
@@ -98,6 +94,26 @@ impl Component for Residence {
     type Storage = DenseVecStorage<Self>;
 }
 
-pub struct PathMaker {
-    path_blocks:    Vec<buildings::Location>
+impl Residence {
+    pub fn new(home: Entity) -> Residence {
+        Residence {
+            home
+        }
+    }
+}
+
+pub struct Job {
+    building:       Entity
+}
+
+impl Component for Job {
+    type Storage = DenseVecStorage<Self>;
+}
+
+impl Job {
+    pub fn new(building: Entity) -> Job {
+        Job {
+            building
+        }
+    }
 }
