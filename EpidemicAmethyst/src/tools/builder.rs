@@ -38,8 +38,57 @@ pub struct GameStateBuilder {
     camera:             Option<Entity>,
     play_state:         PlayStateEnum,
     path_planner:       Option<tools::path_planner::PathPlanner>,
-    male_spritesheet:   Option<Handle<Texture>>,
-    female_spritesheet: Option<Handle<Texture>>
+    male_spritesheet:   Option<Handle<SpriteSheet>>,
+    female_spritesheet: Option<Handle<SpriteSheet>>
+}
+
+fn get_tiled_tileset_from_file(path: &str, world: &mut World) -> tiled::Tileset {
+    let loader = world.read_resource::<Loader>();
+    let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+
+    let file = File::open(path);
+    let reader = BufReader::new(
+        file.expect(&format!("Failed to get file on path: {}", path))
+    );
+    
+    tiled::parse_tileset(reader, 0).expect(&format!("Failed to parse tileset file on path: {}", path))
+}
+
+fn extract_sprites_from_tileset(tileset: &tiled::Tileset, world: &mut World) -> Handle<SpriteSheet> {
+    let image = &tileset.images[0];
+    let mut sprite_vec = Vec::<Sprite>::new();
+
+    let column_count = image.width as u32/tileset.tile_width;
+    let row_count = image.height as u32/tileset.tile_height;
+
+    for column in 0..column_count {
+        for row in 0..row_count {
+            let sprite = Sprite::from_pixel_values(
+                image.width as u32,
+                image.height as u32,
+                tileset.tile_width,
+                tileset.tile_height,
+                column*tileset.tile_width,
+                row*tileset.tile_height,
+                [0.0; 2],
+                false, 
+                false
+            );
+
+            sprite_vec.push(sprite);
+        }
+    }
+
+    let spritesheet = SpriteSheet {
+        texture:    load_texture(["../../Map".to_owned(), image.source.clone()].join("/"), world),
+        sprites:    sprite_vec
+    };
+
+    world.read_resource::<Loader>().load_from_data(
+        spritesheet,
+        (),
+        &world.read_resource::<AssetStorage<SpriteSheet>>()
+    )
 }
 
 impl Default for GameStateBuilder {
@@ -104,28 +153,21 @@ impl GameStateBuilder {
         // tsx_rel_path: &str,
         world: &mut World
     ) {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        let male_sheet = get_tiled_tileset_from_file("../Map/male_sprites.tsx", world);
+        let female_sheet = get_tiled_tileset_from_file("../Map/female_sprites.tsx", world);
 
-        let male_file = File::open("../Map/male_sprites.tsx");
-        let female_file = File::open("../Map/female_sprites.tsx");
-
-        let male_reader = BufReader::new(
-            male_file.expect("Failed to get male file")
+        self.male_spritesheet = Some(
+            extract_sprites_from_tileset(
+                &male_sheet,
+                world
+            )
         );
-        let female_reader = BufReader::new(
-            female_file.expect("Failed to get male file")
+        self.female_spritesheet = Some(
+            extract_sprites_from_tileset(
+                &female_sheet,
+                world
+            )
         );
-
-        let male_sheet = tiled::parse_tileset(
-            male_reader, 
-            0
-        ).expect("Failed to parse male tilesheet");
-
-        let female_sheet = tiled::parse_tileset(
-            female_reader, 
-            0
-        ).expect("Failed top parse female tilesheet");
     }
 
     fn load_map(
@@ -503,7 +545,27 @@ impl GameStateBuilder {
                                     let person = infection::population::Person::new_person();
                                     let residence = infection::population::Residence::new(home.clone());
 
-                                    let person_ent = world.create_entity().with(person).with(residence).build();
+                                    let sprite_render = SpriteRender {
+                                        sprite_sheet:   self.female_spritesheet.clone().unwrap(),
+                                        sprite_number:  1
+                                    };
+
+                                    let mut transform = Transform::default();
+
+                                    transform.set_translation_xyz(
+                                        1.0,
+                                        2.0,
+                                        1.0
+                                    );
+                                
+
+                                    let person_ent = world
+                                        .create_entity()
+                                        .with(person)
+                                        .with(residence)
+                                        .with(sprite_render)
+                                        .with(transform)
+                                        .build();
 
                                     self.people.push(person_ent);
                                     occupants.add(person_ent.clone());

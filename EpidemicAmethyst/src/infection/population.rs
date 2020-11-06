@@ -125,6 +125,8 @@ impl Job {
             building
         }
     }
+}
+
 pub struct InBuilding {
     building:       Entity,
     start_time:     time::Duration

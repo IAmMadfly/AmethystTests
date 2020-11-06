@@ -39,11 +39,6 @@ fn main() -> amethyst::Result<()> {
 
     let game_data = GameDataBuilder::default()
         .with(
-            systems::time::GameTimeSystem::default(),
-            "game_time_system",
-            &[]
-        )
-        .with(
             systems::camera::CameraMovementSystem::default(),
             "camera_movement_system",
             &[]

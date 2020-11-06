@@ -1170,6 +1170,7 @@ name = "epidemic"
 version = "0.1.0"
 dependencies = [
  "amethyst",
+ "chrono",
  "names",
  "pathfinding",
  "rand 0.7.3",
