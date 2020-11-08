@@ -70,7 +70,7 @@ fn extract_sprites_from_tileset(tileset: &tiled::Tileset, world: &mut World) -> 
                 tileset.tile_height,
                 column*tileset.tile_width,
                 row*tileset.tile_height,
-                [0.0; 2],
+                [0.0, -4.0],
                 false, 
                 false
             );
@@ -553,9 +553,9 @@ impl GameStateBuilder {
                                     let mut transform = Transform::default();
 
                                     transform.set_translation_xyz(
-                                        1.0,
-                                        2.0,
-                                        1.0
+                                        32.0/2.0,
+                                        32.0/2.0,
+                                        1.1
                                     );
                                 
 
