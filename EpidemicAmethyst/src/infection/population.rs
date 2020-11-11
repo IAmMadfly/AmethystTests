@@ -2,7 +2,8 @@ use std::time;
 
 use amethyst::{
     prelude::*,
-    ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage}
+    ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage},
+    core::transform::Transform
 };
 
 use names::{Generator, Name};
@@ -94,6 +95,7 @@ impl Person {
         gen.next().unwrap()
     }
 }
+
 
 pub struct Residence {
     home:       Entity
