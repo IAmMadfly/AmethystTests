@@ -22,6 +22,8 @@ use std::{
 
 use rand::Rng;
 
+use crate::tools::coordinates::GridLocation;
+
 use crate::states::game::{
     GameState,
     PlayStateEnum
@@ -557,7 +559,8 @@ impl GameStateBuilder {
                                         32.0/2.0,
                                         1.1
                                     );
-                                
+
+                                    transform.set_grid_xy(2.0-0.5, 2.0-0.5);
 
                                     let person_ent = world
                                         .create_entity()
