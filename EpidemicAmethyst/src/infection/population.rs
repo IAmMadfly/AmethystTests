@@ -3,7 +3,8 @@ use std::time;
 use amethyst::{
     prelude::*,
     ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage},
-    core::transform::Transform
+    core::transform::Transform,
+    renderer::SpriteRender
 };
 
 use names::{Generator, Name};
@@ -56,7 +57,7 @@ impl Component for Person {
 }
 
 impl Person {
-    pub fn new_person() -> Person {
+    fn new_person() -> Person {
         Person {
             name:       Person::generate_random_name(),
             sex:        rand_sex(),
@@ -93,6 +94,42 @@ impl Person {
     fn generate_random_name() -> String {
         let mut gen = Generator::with_naming(Name::Plain);
         gen.next().unwrap()
+    }
+}
+
+pub struct PersonEntBuilder {
+    person:     Person,
+    residence:  Residence,
+    sprite:     SpriteRender,
+    job:        Option<Job>
+}
+
+impl PersonEntBuilder {
+    pub fn new(residence: Residence, sprite: SpriteRender) -> Self {
+        PersonEntBuilder {
+            person:     Person::new_person(),
+            residence,
+            sprite,
+            job:    None
+        }
+    }
+
+    pub fn add_job(&mut self, job: Job) {
+        self.job = Some(job);
+    }
+
+    pub fn build(self, world: &mut World) -> Entity {
+        let mut person_ent_builder = world
+            .create_entity()
+            .with(self.person)
+            .with(self.residence)
+            .with(self.sprite);
+
+        if let Some(job) = self.job {
+            person_ent_builder = person_ent_builder.with(job);
+        }
+
+        person_ent_builder.build()
     }
 }
 

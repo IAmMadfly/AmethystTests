@@ -544,13 +544,16 @@ impl GameStateBuilder {
                                     //     home.clone(),
                                     //     world
                                     // );
-                                    let person = infection::population::Person::new_person();
-                                    let residence = infection::population::Residence::new(home.clone());
 
                                     let sprite_render = SpriteRender {
                                         sprite_sheet:   self.female_spritesheet.clone().unwrap(),
                                         sprite_number:  1
                                     };
+
+                                    let person_builder = infection::population::PersonEntBuilder::new(
+                                        infection::population::Residence::new(home.clone()), 
+                                        sprite_render
+                                    );
 
                                     let mut transform = Transform::default();
 
