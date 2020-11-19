@@ -8,28 +8,16 @@ use amethyst::{
     ecs::prelude::Entity,
     input::{self, InputEvent},
     renderer::{
-        rendy::{wsi::winit::MouseButton},
+        rendy::wsi::winit::MouseButton,
         Camera
     },
     window::{ScreenDimensions},
     winit::VirtualKeyCode
 };
 
-// use std::{
-//     collections::HashMap,
-//     io::BufReader,
-//     path::Path,
-//     fs::File
-// };
-
 use crate::states;
 use crate::infection;
 use crate::tools;
-
-pub enum PlayStateEnum {
-    Paused,
-    InGame
-}
 
 pub struct GameState {
     map:            tiled::Map,
@@ -37,7 +25,6 @@ pub struct GameState {
     workplaces:     Vec<Entity>,
     people:         Vec<Entity>,
     camera:         Entity,
-    play_state:     PlayStateEnum,
     path_planner:   tools::path_planner::PathPlanner
 }
 
@@ -46,9 +33,6 @@ impl SimpleState for GameState {
         
         println!("-- Game is starting!! --");
         let world = _data.world;
-
-        world.insert(PlayStateEnum::InGame);
-        //world.register::<CameraMovementSystem>();
 
         world.write_resource::<timing::Time>().set_time_scale(10.0);
     }
@@ -136,7 +120,6 @@ impl GameState {
         workplaces:     Vec<Entity>,
         people:         Vec<Entity>,
         camera:         Entity,
-        play_state:     PlayStateEnum,
         path_planner:   tools::path_planner::PathPlanner) -> GameState {
             GameState {
                 map,
@@ -144,7 +127,6 @@ impl GameState {
                 workplaces,
                 people,
                 camera,
-                play_state,
                 path_planner
             }
 

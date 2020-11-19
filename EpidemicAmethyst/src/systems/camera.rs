@@ -10,6 +10,8 @@ use amethyst::{
 
 use crate::states::game;
 
+use crate::systems::game_time::PlayStateEnum;
+
 pub struct CameraMovementSystem {
     prev_mouse_pos:         Option<(f32, f32)>,
     camera_scale:           f32
@@ -29,15 +31,15 @@ impl<'s> System<'s> for CameraMovementSystem {
         WriteStorage<'s, Camera>,
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,
-        Option<Read<'s, game::PlayStateEnum>>
+        Option<Read<'s, PlayStateEnum>>
     );
 
     fn run(&mut self, (mut camera, mut transforms, input_handler, game_play_state): Self::SystemData) {
         let mut run_system = false;
         if let Some(play_state) = game_play_state {
             match *play_state {
-                game::PlayStateEnum::Paused => run_system = false,
-                game::PlayStateEnum::InGame => run_system = true
+                PlayStateEnum::Paused => run_system = false,
+                PlayStateEnum::InGame => run_system = true
             }
         }
 

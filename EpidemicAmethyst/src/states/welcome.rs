@@ -6,7 +6,7 @@ use amethyst::{
     winit::VirtualKeyCode
 };
 
-use crate::states::game;
+use crate::systems::game_time::PlayStateEnum;
 use crate::tools::{
     passer,
     builder
@@ -59,7 +59,7 @@ impl SimpleState for WelcomeState {
         _data: StateData<'_, GameData<'_, '_>>, 
         event: StateEvent
     ) -> SimpleTrans {
-        let _world = _data.world;
+        let world = _data.world;
 
         match event {
             StateEvent::Window(window_event) => {
@@ -77,6 +77,9 @@ impl SimpleState for WelcomeState {
             }) => {
                 if Some(target) == self.start_butt {
                     println!("Starting game!!");
+
+                    let mut game_state = world.write_resource::<PlayStateEnum>();
+                    *game_state = PlayStateEnum::InGame;
                     return Trans::Switch(
                         Box::new(
                             self.game_loader

@@ -3,10 +3,10 @@ use amethyst::{
     assets::{AssetStorage, Loader, Handle},
     core::{
         transform::Transform,
-        math::{Vector3, Vector2, Point3},
+        math::Vector3
     },
     prelude::*,
-    ecs::prelude::{Entity, Component, DenseVecStorage},
+    ecs::prelude::Entity,
     renderer::{
         sprite::{SpriteRender, Sprite, SpriteSheet},
         Camera, ImageFormat, Texture},
@@ -24,10 +24,8 @@ use rand::Rng;
 
 use crate::tools::coordinates::GridLocation;
 
-use crate::states::game::{
-    GameState,
-    PlayStateEnum
-};
+use crate::states::game::GameState;
+
 use crate::infection;
 use crate::tools;
 use crate::systems::animation::AnimatedSprite;
@@ -38,7 +36,6 @@ pub struct GameStateBuilder {
     workplaces:         Vec<Entity>,
     people:             Vec<Entity>,
     camera:             Option<Entity>,
-    play_state:         PlayStateEnum,
     path_planner:       Option<tools::path_planner::PathPlanner>,
     male_spritesheet:   Option<Handle<SpriteSheet>>,
     female_spritesheet: Option<Handle<SpriteSheet>>
@@ -101,7 +98,6 @@ impl Default for GameStateBuilder {
             workplaces:         Vec::new(),
             people:             Vec::new(),
             camera:             None,
-            play_state:         PlayStateEnum::InGame,
             path_planner:       None,
             male_spritesheet:   None,
             female_spritesheet: None
@@ -125,7 +121,6 @@ impl GameStateBuilder {
             self.workplaces,
             self.people,
             self.camera.unwrap(),
-            self.play_state,
             self.path_planner.unwrap()
         )
     }
@@ -454,10 +449,9 @@ impl GameStateBuilder {
     pub fn load_game_map(&mut self, world: &mut World) {
         world.register::<infection::buildings::Building>();
         world.register::<infection::buildings::BuildingEntrance>();
-        world.register::<infection::buildings::MaxOccupants>();
         world.register::<infection::buildings::Location>();
+        world.register::<infection::buildings::MaxOccupants>();
         world.register::<infection::population::Person>();
-        world.register::<infection::population::Occupants>();
         world.register::<infection::population::Residence>();
         world.register::<infection::population::Job>();
 
@@ -503,7 +497,7 @@ impl GameStateBuilder {
                                         max_occupant_count = *int_val as usize;
                                     } else {
                                         println!("Failed to find 'peopleCount' integer, getting random number!");
-                                        max_occupant_count =  rand::thread_rng().gen_range(3, 25);
+                                        panic!();
                                     }
 
                                     println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
@@ -512,13 +506,17 @@ impl GameStateBuilder {
 
                                     let location = infection::buildings::Location::new(
                                         (home_object.x/32.0).round(),
-                                        ((map_size.1 as f32 - home_object.y)/32.0).round() - size[1]);
+                                        ((map_size.1 as f32 - home_object.y)/32.0).round() - size[1]
+                                    );
 
                                     let max_occupants = infection::buildings::MaxOccupants::new(
                                         max_occupant_count
                                     );
 
-                                    let building = infection::buildings::Building::new(home_object.id, size);
+                                    let building = infection::buildings::Building::new(
+                                        home_object.id,
+                                        size
+                                    );
 
                                     world.create_entity()
                                         .with(building)
@@ -537,7 +535,7 @@ impl GameStateBuilder {
                                     .expect("Failed to get building component")
                                     .get_max_occupants();
 
-                                let mut occupants = infection::population::Occupants::new();
+                                let mut occupants = Vec::<Entity>::new();
 
                                 for _ in 0..max_occupants {
                                     // let new_person = infection::population::Person::new_with_residence(
@@ -552,7 +550,8 @@ impl GameStateBuilder {
 
                                     let person_builder = infection::population::PersonEntBuilder::new(
                                         infection::population::Residence::new(home.clone()), 
-                                        sprite_render
+                                        sprite_render,
+                                        world
                                     );
 
                                     let mut transform = Transform::default();
@@ -565,25 +564,19 @@ impl GameStateBuilder {
 
                                     transform.set_grid_xy(2.0-0.5, 2.0-0.5);
 
-                                    let person_ent = world
-                                        .create_entity()
-                                        .with(person)
-                                        .with(residence)
-                                        .with(sprite_render)
-                                        .with(transform)
-                                        .build();
+                                    let person_ent = person_builder.build(world);
 
-                                    self.people.push(person_ent);
-                                    occupants.add(person_ent.clone());
+                                    occupants.push(person_ent.clone());
                                 }
 
-                                let res = world
-                                    .write_storage::<infection::population::Occupants>()
-                                    .insert(home, occupants);
+                                let mut building_comp = {world
+                                    .write_component::<infection::buildings::Building>()
+                                };
+                                let building = building_comp
+                                    .get_mut(home)
+                                    .expect("Failed to get building component");
                                 
-                                if let Err(er) = res {
-                                    println!("Failed to add Occupants to buildings! Error: {}", er);
-                                }
+                                building.add_occupants(occupants, world);
                             }
                             tiled::ObjectShape::Point(x, y) => {
                                 let location = infection::buildings::Location::new(

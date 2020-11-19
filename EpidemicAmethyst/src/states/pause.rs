@@ -2,11 +2,10 @@ use amethyst::{
     ecs::prelude::Entity,
     input,
     prelude::*,
-    ui::{UiCreator, UiFinder, UiEvent, UiEventType, UiButtonBuilder, UiButton},
     winit::VirtualKeyCode
 };
 
-use crate::states::game::PlayStateEnum;
+use crate::systems::game_time::PlayStateEnum;
 
 pub struct PauseState {
     ui_handle:      Option<Entity>

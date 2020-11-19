@@ -8,6 +8,7 @@ use amethyst::{
 
 use crate::states::game;
 use crate::infection::population;
+use crate::systems::game_time::PlayStateEnum;
 
 pub struct PathPlanningSystem {
 
@@ -26,7 +27,7 @@ impl<'s> System<'s> for PathPlanningSystem {
         ReadStorage<'s, population::Person>,
         WriteStorage<'s, population::InBuilding>,
         WriteStorage<'s, population::Traveling>,
-        Option<Read<'s, game::PlayStateEnum>>
+        Option<Read<'s, PlayStateEnum>>
     );
 
     fn run(&mut self, (people, mut inbuildings, mut travels, game_play_state): Self::SystemData) {

@@ -1,9 +1,7 @@
 use amethyst::{
     prelude::*,
-    ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage, EntityBuilder}
+    ecs::{Component, DenseVecStorage, DefaultVecStorage, Entity},
 };
-
-use rand::Rng;
 
 pub struct Location {
     x:      f32,
@@ -50,7 +48,8 @@ impl Location {
 
 pub struct Building {
     _id:                u32,
-    pub size:           [f32; 2]
+    pub size:           [f32; 2],
+    occupants:          Vec<(Entity, time::PrimitiveDateTime)>
 }
 
 impl Component for Building {
@@ -60,8 +59,21 @@ impl Component for Building {
 impl Building {
     pub fn new (id: u32, size: [f32; 2]) -> Self {
         Building {
-            _id: id,
-            size
+            _id:        id,
+            size,
+            occupants:  Vec::new()
+        }
+    }
+
+    pub fn add_occupants(&mut self, new_occupants: Vec<Entity>, world: &World) {
+        let curr_time = (*world
+            .read_resource::<time::PrimitiveDateTime>())
+            .clone();
+        
+        for new_occupant in new_occupants {
+            self.occupants.push(
+                (new_occupant, curr_time.clone())
+            );
         }
     }
 }

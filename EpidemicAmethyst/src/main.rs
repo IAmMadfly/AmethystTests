@@ -43,6 +43,10 @@ fn main() -> amethyst::Result<()> {
             "camera_movement_system",
             &[]
         )
+        .with_system_desc(
+            systems::game_time::GameTimeSystemDesc::default(),
+            "game_time_system",
+            &[])
         .with(
             systems::animation::SpriteAnimationSystem::default(),
             "sprite_animation_system",

@@ -26,7 +26,7 @@ impl PathPoint {
     }
 
     fn distance_to(&self, other: &PathPoint) -> u32 {
-        (self.x - other.x)
+        self.x - other.x
     }
 }
 

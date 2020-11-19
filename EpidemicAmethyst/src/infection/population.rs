@@ -1,15 +1,19 @@
-use std::time;
-
 use amethyst::{
     prelude::*,
-    ecs::{Entity, Component, DenseVecStorage, DefaultVecStorage},
-    core::transform::Transform,
-    renderer::SpriteRender
+    ecs::{Entity, EntityBuilder, Component, DenseVecStorage},
+    renderer::SpriteRender,
+    core::Transform
 };
 
 use names::{Generator, Name};
 use crate::infection::infection;
 use crate::infection::buildings;
+
+use time::{
+    time,
+    PrimitiveDateTime,
+    Duration
+};
 
 #[derive(Debug)]
 enum Sex {
@@ -25,25 +29,25 @@ fn rand_sex() -> Sex {
     }
 }
 
-pub struct Occupants {
-    people:         Vec<Entity>
-}
+// pub struct Occupants {
+//     people:         Vec<Entity>
+// }
 
-impl Component for Occupants {
-    type Storage    = DenseVecStorage<Self>;
-}
+// impl Component for Occupants {
+//     type Storage    = DenseVecStorage<Self>;
+// }
 
-impl Occupants {
-    pub fn new() -> Self {
-        Occupants {
-            people:     Vec::new()
-        }
-    }
+// impl Occupants {
+//     pub fn new() -> Self {
+//         Occupants {
+//             people:     Vec::new()
+//         }
+//     }
 
-    pub fn add(&mut self, person: Entity) {
-        self.people.push(person);
-    }
-}
+//     pub fn add(&mut self, person: Entity) {
+//         self.people.push(person);
+//     }
+// }
 
 pub struct Person {
     name:           String,
@@ -80,7 +84,7 @@ impl Person {
 
         let person_in_home = InBuilding {
             building:   residence_ent,
-            start_time: time::Duration::new(0, 0)
+            start_time: (*world.read_resource::<PrimitiveDateTime>()).clone()
         };
 
 
@@ -101,21 +105,43 @@ pub struct PersonEntBuilder {
     person:     Person,
     residence:  Residence,
     sprite:     SpriteRender,
+    transform:  Transform,
     job:        Option<Job>
 }
 
 impl PersonEntBuilder {
-    pub fn new(residence: Residence, sprite: SpriteRender) -> Self {
+    pub fn new(
+        residence: Residence, 
+        sprite: SpriteRender, 
+        world: &mut World
+    ) -> PersonEntBuilder {
+
+        let transform = Transform::default();
+
         PersonEntBuilder {
             person:     Person::new_person(),
             residence,
             sprite,
-            job:    None
+            job:        None,
+            transform
         }
     }
 
     pub fn add_job(&mut self, job: Job) {
         self.job = Some(job);
+    }
+
+    pub fn get_entity_builder(self, world: &mut World) -> EntityBuilder {
+        let mut builder = world.create_entity()
+            .with(self.person)
+            .with(self.residence)
+            .with(self.sprite);
+
+        if let Some(job) = self.job {
+            builder = builder.with(job);
+        }
+
+        return builder
     }
 
     pub fn build(self, world: &mut World) -> Entity {
@@ -151,7 +177,8 @@ impl Residence {
 }
 
 pub struct Job {
-    building:       Entity
+    building:       Entity,
+    work_time:      [Option<(time::Time, Duration)>; 7]
 }
 
 impl Component for Job {
@@ -161,14 +188,23 @@ impl Component for Job {
 impl Job {
     pub fn new(building: Entity) -> Job {
         Job {
-            building
+            building,
+            work_time:      [
+                Some((time!(9:00 am), Duration::hours(8))),
+                Some((time!(9:00 am), Duration::hours(8))),
+                Some((time!(9:00 am), Duration::hours(8))),
+                Some((time!(9:00 am), Duration::hours(8))),
+                Some((time!(9:00 am), Duration::hours(8))),
+                None,
+                None
+            ]
         }
     }
 }
 
 pub struct InBuilding {
     building:       Entity,
-    start_time:     time::Duration
+    start_time:     time::PrimitiveDateTime
 }
 
 impl Component for InBuilding {
