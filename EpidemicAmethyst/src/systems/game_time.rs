@@ -1,6 +1,9 @@
 use amethyst::{
-    core::SystemDesc,
-    ecs::{System, SystemData, World},
+    core::{
+        SystemDesc,
+        timing::Time
+    },
+    ecs::{System, World, WriteExpect, SystemData, Read},
 };
 use time;
 
@@ -13,10 +16,19 @@ pub enum PlayStateEnum {
 pub struct GameTimeSystem {}
 
 impl<'s> System<'s> for GameTimeSystem {
-    type SystemData = ();
+    type SystemData = (
+        WriteExpect<'s, time::PrimitiveDateTime>,
+        Read<'s, Time>
+    );
 
-    fn run(&mut self, data: Self::SystemData) {
-        
+    fn run(&mut self, (mut game_datetime, timing): Self::SystemData) {
+        println!(
+            "Game time is: {}, {}",
+            game_datetime.date(),
+            game_datetime.time()
+        );
+
+        *game_datetime += timing.absolute_time();
     }
 }
 

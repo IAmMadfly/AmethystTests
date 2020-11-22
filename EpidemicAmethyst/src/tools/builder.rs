@@ -538,10 +538,6 @@ impl GameStateBuilder {
                                 let mut occupants = Vec::<Entity>::new();
 
                                 for _ in 0..max_occupants {
-                                    // let new_person = infection::population::Person::new_with_residence(
-                                    //     home.clone(),
-                                    //     world
-                                    // );
 
                                     let sprite_render = SpriteRender {
                                         sprite_sheet:   self.female_spritesheet.clone().unwrap(),
@@ -567,6 +563,7 @@ impl GameStateBuilder {
                                     let person_ent = person_builder.build(world);
 
                                     occupants.push(person_ent.clone());
+                                    self.people.push(person_ent);
                                 }
 
                                 let mut building_comp = {world
@@ -653,6 +650,8 @@ impl GameStateBuilder {
                 }
             }
             // Completed loading information into path planner
+
+            // Load path planner into self variable for loading
             self.path_planner = Some(planner);
 
             // Start loading entrances on buildings
@@ -726,7 +725,9 @@ impl GameStateBuilder {
             for person in &self.people {
                 let result = world
                     .write_component::<infection::population::Job>()
-                    .insert(*person, infection::population::Job::new(self.workplaces[0]));
+                    .insert(*person, infection::population::Job::new(
+                        self.workplaces[0]
+                    ));
 
                 if let Err(er) = result {
                     println!("Error occured during job allocation: {}", er);
