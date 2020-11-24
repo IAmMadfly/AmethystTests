@@ -29,7 +29,7 @@ impl SimpleState for PauseState {
     }
 
     fn on_stop(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
-        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::Paused;
+        *_data.world.write_resource::<PlayStateEnum>() = PlayStateEnum::InGame;
         println!("Exit PauseState");
     }
 

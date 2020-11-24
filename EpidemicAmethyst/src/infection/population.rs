@@ -11,6 +11,8 @@ use crate::infection::buildings;
 
 use time::{
     time,
+    Time,
+    Weekday,
     PrimitiveDateTime,
     Duration
 };
@@ -176,6 +178,18 @@ impl Residence {
     }
 }
 
+fn get_weekday_index(weekday: Weekday) -> usize {
+    match weekday {
+        Weekday::Monday => 0,
+        Weekday::Tuesday => 1,
+        Weekday::Wednesday => 2,
+        Weekday::Thursday => 3,
+        Weekday::Friday => 4,
+        Weekday::Saturday => 5,
+        Weekday::Sunday => 6,
+    }
+}
+
 pub struct Job {
     building:       Entity,
     work_time:      [Option<(time::Time, Duration)>; 7]
@@ -198,6 +212,16 @@ impl Job {
                 None,
                 None
             ]
+        }
+    }
+
+    pub fn work_started(&self, datetime: PrimitiveDateTime) -> bool {
+        let index = get_weekday_index(datetime.weekday());
+
+        if let Some((Time, Duration)) = self.work_time[index] {
+            return true
+        } else {
+            return false
         }
     }
 }

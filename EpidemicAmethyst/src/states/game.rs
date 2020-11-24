@@ -17,15 +17,13 @@ use amethyst::{
 
 use crate::states;
 use crate::infection;
-use crate::tools;
 
 pub struct GameState {
     map:            tiled::Map,
     houses:         Vec<Entity>,
     workplaces:     Vec<Entity>,
     people:         Vec<Entity>,
-    camera:         Entity,
-    path_planner:   tools::path_planner::PathPlanner
+    camera:         Entity
 }
 
 impl SimpleState for GameState {
@@ -119,15 +117,14 @@ impl GameState {
         houses:         Vec<Entity>,
         workplaces:     Vec<Entity>,
         people:         Vec<Entity>,
-        camera:         Entity,
-        path_planner:   tools::path_planner::PathPlanner) -> GameState {
+        camera:         Entity
+    ) -> GameState {
             GameState {
                 map,
                 houses,
                 workplaces,
                 people,
-                camera,
-                path_planner
+                camera
             }
 
     }

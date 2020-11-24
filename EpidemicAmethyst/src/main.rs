@@ -46,15 +46,14 @@ fn main() -> amethyst::Result<()> {
         .with_system_desc(
             systems::game_time::GameTimeSystemDesc::default(),
             "game_time_system",
-            &[])
-        .with(
+            &[]
+        ).with_system_desc(
+            systems::path_planning::PathPlanningSystemDesc::default(),
+            "path_planning_system",
+            &[]
+        ).with(
             systems::animation::SpriteAnimationSystem::default(),
             "sprite_animation_system",
-            &[]
-        )
-        .with(
-            systems::path_planning::PathPlanningSystem::default(),
-            "path_planning_system",
             &[]
         )
         .with(

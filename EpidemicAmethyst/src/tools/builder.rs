@@ -36,7 +36,6 @@ pub struct GameStateBuilder {
     workplaces:         Vec<Entity>,
     people:             Vec<Entity>,
     camera:             Option<Entity>,
-    path_planner:       Option<tools::path_planner::PathPlanner>,
     male_spritesheet:   Option<Handle<SpriteSheet>>,
     female_spritesheet: Option<Handle<SpriteSheet>>
 }
@@ -98,7 +97,6 @@ impl Default for GameStateBuilder {
             workplaces:         Vec::new(),
             people:             Vec::new(),
             camera:             None,
-            path_planner:       None,
             male_spritesheet:   None,
             female_spritesheet: None
         }
@@ -109,10 +107,9 @@ impl GameStateBuilder {
 
     pub fn build(self) -> GameState {
         println!(
-            "Unwrapping game state! Map: {}, Camera: {}, PathPlanner: {}",
+            "Unwrapping game state! Map: {}, Camera: {}",
             self.map.is_some(),
-            self.camera.is_some(),
-            self.path_planner.is_some()
+            self.camera.is_some()
         );
 
         GameState::new(
@@ -120,8 +117,7 @@ impl GameStateBuilder {
             self.houses,
             self.workplaces,
             self.people,
-            self.camera.unwrap(),
-            self.path_planner.unwrap()
+            self.camera.unwrap()
         )
     }
 
@@ -469,7 +465,11 @@ impl GameStateBuilder {
             let mut house_entrance: Vec<infection::buildings::BuildingEntrance> = Vec::new();
             let mut work_entrance: Vec<infection::buildings::BuildingEntrance> = Vec::new();
             
-            let mut planner = tools::path_planner::PathPlanner::new((map.width as usize, map.height as usize));
+            //let mut planner = tools::path_planner::PathPlanner::new((map.width as usize, map.height as usize));
+            world
+                .write_resource::<tools::path_planner::PathPlanner>().new_map(
+                    (map.width as usize, map.height as usize)
+                );
 
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
@@ -645,14 +645,13 @@ impl GameStateBuilder {
                             (walking_path.height/32.0).ceil() as u32
                         );
                         
-                        planner.add_path_blocks(loc, size);
+                        world
+                            .write_resource::<tools::path_planner::PathPlanner>()
+                            .add_path_blocks(loc, size);
                     }
                 }
             }
             // Completed loading information into path planner
-
-            // Load path planner into self variable for loading
-            self.path_planner = Some(planner);
 
             // Start loading entrances on buildings
             println!("Got {} building entrances for {} workplaces", 

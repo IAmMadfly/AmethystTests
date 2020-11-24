@@ -1,6 +1,23 @@
 use std::hash::{Hash, Hasher};
+use amethyst::ecs::storage::GenericWriteStorage;
 use pathfinding::prelude::astar;
 
+fn get_new_map(size: (usize, usize)) -> Vec<Vec<PathPoint>> {
+    let mut vec = Vec::new();
+    for y_index in 0..size.1 {
+        vec.insert(
+            y_index, 
+            Vec::new()
+        );
+        for x_index in 0..size.0 {
+            vec[y_index].insert(
+                x_index,
+                PathPoint::new(x_index, y_index)
+            );
+        }
+    }
+    vec
+}
 
 pub struct PathPoint {
     x:      u32,
@@ -69,26 +86,14 @@ impl PathPlanner {
 
         let planner = 
             PathPlanner {
-                map:    {
-                    let mut vec = Vec::new();
-                    for y_index in 0..size.1 {
-                        vec.insert(
-                            y_index, 
-                            Vec::new()
-                        );
-                        for x_index in 0..size.0 {
-                            vec[y_index].insert(
-                                x_index,
-                                PathPoint::new(x_index, y_index)
-                            );
-                        }
-                    }
-                    vec
-                }
-                // vec![vec![default_path_point.clone(); size.0]; size.1]
+                map:    get_new_map(size)
             };
 
         planner
+    }
+
+    pub fn new_map(&mut self, size: (usize, usize)) {
+        self.map = get_new_map(size);
     }
 
     pub fn add_path_blocks(&mut self, location: (u32, u32), size: (u32, u32)) {
