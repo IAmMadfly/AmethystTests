@@ -13,18 +13,6 @@ use crate::tools::path_planner;
 use crate::infection::population;
 use crate::systems::game_time::PlayStateEnum;
 
-fn get_weekday_index(weekday: Weekday) -> u8 {
-    match weekday {
-        Weekday::Monday => 0,
-        Weekday::Tuesday => 1,
-        Weekday::Wednesday => 2,
-        Weekday::Thursday => 3,
-        Weekday::Friday => 4,
-        Weekday::Saturday => 5,
-        Weekday::Sunday => 6,
-    }
-}
-
 pub struct PathPlanningSystem {
 
 }
@@ -62,10 +50,9 @@ impl<'s> System<'s> for PathPlanningSystem {
             datetime
         ): Self::SystemData
     ) {
+        println!("Running path planner! Got people");
         for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
-            let weekday_index = get_weekday_index(datetime.weekday());
-
-            
+            println!("Got people!!");
             
         }
     }
@@ -79,7 +66,7 @@ impl<'a, 'b> SystemDesc<'a, 'b, PathPlanningSystem> for PathPlanningSystemDesc {
         <PathPlanningSystem as System<'_>>::SystemData::setup(world);
 
         world.insert(path_planner::PathPlanner::new((0,0)));
-
+        println!("Returning PathPlanningSystem!");
         PathPlanningSystem::default()
     }
 }

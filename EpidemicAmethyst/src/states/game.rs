@@ -99,14 +99,6 @@ impl SimpleState for GameState {
     }
 
     fn update(&mut self, state_data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        //println!("Updating GameState!");
-        let time = state_data.world.read_resource::<timing::Time>();
-
-        println!("Time is: {}, vs {}", 
-            time.absolute_time().as_secs_f32(), 
-            time.absolute_real_time().as_secs_f32()
-        );
-
         Trans::None
     }
 }

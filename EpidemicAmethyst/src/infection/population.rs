@@ -104,11 +104,12 @@ impl Person {
 }
 
 pub struct PersonEntBuilder {
-    person:     Person,
-    residence:  Residence,
-    sprite:     SpriteRender,
-    transform:  Transform,
-    job:        Option<Job>
+    person:         Person,
+    residence:      Residence,
+    in_building:    InBuilding,
+    sprite:         SpriteRender,
+    transform:      Transform,
+    job:            Option<Job>
 }
 
 impl PersonEntBuilder {
@@ -120,9 +121,17 @@ impl PersonEntBuilder {
 
         let transform = Transform::default();
 
+        let start_time = world.read_resource::<PrimitiveDateTime>().clone();
+
+        let in_building = InBuilding{
+            start_time:     *start_time.clone(),
+            building:       residence.home.clone()
+        };
+
         PersonEntBuilder {
             person:     Person::new_person(),
             residence,
+            in_building:    in_building,
             sprite,
             job:        None,
             transform
@@ -155,6 +164,9 @@ impl PersonEntBuilder {
 
         if let Some(job) = self.job {
             person_ent_builder = person_ent_builder.with(job);
+            println!("Made person with job!");
+        } else {
+            println!("Made person without job!");
         }
 
         person_ent_builder.build()

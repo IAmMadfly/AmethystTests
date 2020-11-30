@@ -1,8 +1,10 @@
 use amethyst::{
-    ecs::{Component, Join, Read, System, DenseVecStorage, WriteStorage},
+    ecs::{Component, Join, Read, ReadExpect, System, DenseVecStorage, WriteStorage},
     core::timing::Time,
     renderer::SpriteRender
 };
+
+use crate::systems::game_time::PlayStateEnum;
 
 #[derive(Clone)]
 pub struct AnimatedSprite {
@@ -44,26 +46,29 @@ impl<'s> System<'s> for SpriteAnimationSystem {
     type SystemData = (
         WriteStorage<'s, SpriteRender>,
         WriteStorage<'s, AnimatedSprite>,
-        Read<'s, Time>
+        Read<'s, Time>,
+        ReadExpect<'s, PlayStateEnum>
     );
 
-    fn run(&mut self, (mut sprite_renders, mut sprite_animation, time): Self::SystemData) {
-        for (sprite_render, animation) in (&mut sprite_renders, &mut sprite_animation).join() {
-            animation.curr_duration += time.delta_time();
-
-            if let Some(frame) = animation.animation_data.get(animation.curr_index) {
-                if animation.curr_duration.as_millis() >= (frame.duration as u128) {
-                    let mut new_index: usize = animation.curr_index + 1;
-                    if new_index == animation.animation_data.len() {
-                        new_index =     0;
+    fn run(&mut self, (mut sprite_renders, mut sprite_animation, time, play_state): Self::SystemData) {
+        if let PlayStateEnum::InGame = *play_state {
+            for (sprite_render, animation) in (&mut sprite_renders, &mut sprite_animation).join() {
+                animation.curr_duration += time.delta_time();
+    
+                if let Some(frame) = animation.animation_data.get(animation.curr_index) {
+                    if animation.curr_duration.as_millis() >= (frame.duration as u128) {
+                        let mut new_index: usize = animation.curr_index + 1;
+                        if new_index == animation.animation_data.len() {
+                            new_index =     0;
+                        }
+                        
+                        sprite_render.sprite_number =   animation.animation_data[new_index].tile_id as usize;
+                        animation.curr_duration =       std::time::Duration::new(0, 0);
+                        animation.curr_index =          new_index;
                     }
-                    
-                    sprite_render.sprite_number =   animation.animation_data[new_index].tile_id as usize;
-                    animation.curr_duration =       std::time::Duration::new(0, 0);
-                    animation.curr_index =          new_index;
+                } else {
+                    println!("Error getting Vector value!!");
                 }
-            } else {
-                println!("Error getting Vector value!!");
             }
         }
     }
