@@ -50,9 +50,14 @@ impl<'s> System<'s> for PathPlanningSystem {
             datetime
         ): Self::SystemData
     ) {
-        println!("Running path planner! Got people");
+        
         for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
-            println!("Got people!!");
+            if job.work_active(*datetime) {
+                let start_location = inbuilding.get_location(world);
+                
+                let path = path_planner
+                    .plan_path(start_location, end);
+            }
             
         }
     }

@@ -5,6 +5,7 @@ use amethyst::{
     core::Transform
 };
 
+use buildings::{BuildingEntrance, Location};
 use names::{Generator, Name};
 use crate::infection::infection;
 use crate::infection::buildings;
@@ -143,10 +144,19 @@ impl PersonEntBuilder {
     }
 
     pub fn get_entity_builder(self, world: &mut World) -> EntityBuilder {
+        let start_time = *world
+            .read_resource::<PrimitiveDateTime>().clone();
+
+        let inbuilding = InBuilding {
+            building:       self.residence.home.clone(),
+            start_time:     start_time
+        };
+
         let mut builder = world.create_entity()
             .with(self.person)
             .with(self.residence)
-            .with(self.sprite);
+            .with(self.sprite)
+            .with(inbuilding);
 
         if let Some(job) = self.job {
             builder = builder.with(job);
@@ -156,11 +166,20 @@ impl PersonEntBuilder {
     }
 
     pub fn build(self, world: &mut World) -> Entity {
+        let start_time = *world
+            .read_resource::<PrimitiveDateTime>().clone();
+
+        let inbuilding = InBuilding {
+            building:       self.residence.home.clone(),
+            start_time:     start_time
+        };
+
         let mut person_ent_builder = world
             .create_entity()
             .with(self.person)
             .with(self.residence)
-            .with(self.sprite);
+            .with(self.sprite)
+            .with(inbuilding);
 
         if let Some(job) = self.job {
             person_ent_builder = person_ent_builder.with(job);
@@ -227,11 +246,14 @@ impl Job {
         }
     }
 
-    pub fn work_started(&self, datetime: PrimitiveDateTime) -> bool {
+    pub fn work_active(&self, datetime: PrimitiveDateTime) -> bool {
         let index = get_weekday_index(datetime.weekday());
 
-        if let Some((Time, Duration)) = self.work_time[index] {
-            return true
+        if let Some((time, duration)) = self.work_time[index] {
+            if time < datetime.time() && ((time + duration) > datetime.time()) {
+                return true
+            }
+            return false
         } else {
             return false
         }
@@ -245,6 +267,19 @@ pub struct InBuilding {
 
 impl Component for InBuilding {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl InBuilding {
+    pub fn get_location(&self, world: &World) -> Location {
+        let entrance_reader = world
+            .read_component::<BuildingEntrance>();
+        
+        let entrance = entrance_reader
+            .get(self.building)
+            .expect("Failed to get entrance for building!");
+        
+        entrance.location
+    }
 }
 
 pub struct Traveling {
