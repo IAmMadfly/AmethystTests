@@ -1,7 +1,7 @@
 use amethyst::{
     core::{Transform, SystemDesc},
     ecs::{
-        Join, ReadExpect,
+        Join, Read, ReadExpect,
         System, WriteStorage,
         ReadStorage, World, SystemData
     },
@@ -10,7 +10,7 @@ use amethyst::{
 use time::{PrimitiveDateTime, Weekday};
 
 use crate::tools::path_planner;
-use crate::infection::population;
+use crate::infection::population::{self, BuildingContainerComponent};
 use crate::systems::game_time::PlayStateEnum;
 
 pub struct PathPlanningSystem {
@@ -27,6 +27,7 @@ impl Default for PathPlanningSystem {
 
 impl<'s> System<'s> for PathPlanningSystem {
     type SystemData = (
+        Read<'s, World>,
         ReadStorage<'s, population::Person>,
         ReadStorage<'s, population::Job>,
         WriteStorage<'s, population::InBuilding>,
@@ -40,6 +41,7 @@ impl<'s> System<'s> for PathPlanningSystem {
     fn run(
         &mut self,
         (
+            world,
             people,
             jobs,
             mut inbuildings,
@@ -53,10 +55,29 @@ impl<'s> System<'s> for PathPlanningSystem {
         
         for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
             if job.work_active(*datetime) {
-                let start_location = inbuilding.get_location(world);
+                let start_location = inbuilding.get_location(&*world);
+                let end_location = job.get_location(&*world);
+                
+                let start_location_format = (
+                    start_location.block_x() as usize,
+                    start_location.block_y() as usize
+                );
+                let end_location_format = (
+                    end_location.block_x() as usize,
+                    end_location.block_y() as usize
+                );
                 
                 let path = path_planner
-                    .plan_path(start_location, end);
+                    .plan_path(
+                        start_location_format,
+                        end_location_format
+                    );
+                
+                if let Some(valid_path) = path {
+                    println!("Found a valid path to work!");
+                } else {
+                    println!("Failed to get path to work!");
+                }
             }
             
         }

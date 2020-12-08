@@ -221,6 +221,21 @@ fn get_weekday_index(weekday: Weekday) -> usize {
     }
 }
 
+pub trait BuildingContainerComponent {
+    fn get_building(&self) -> Entity;
+
+    fn get_location(&self, world: &World) -> Location {
+        let entrance_reader = world
+            .read_component::<BuildingEntrance>();
+        
+        let entrance = entrance_reader
+            .get(self.get_building())
+            .expect("Failed to get entrance for building!");
+        
+        entrance.location.clone()
+    }
+}
+
 pub struct Job {
     building:       Entity,
     work_time:      [Option<(time::Time, Duration)>; 7]
@@ -228,6 +243,12 @@ pub struct Job {
 
 impl Component for Job {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl BuildingContainerComponent for Job {
+    fn get_building(&self) -> Entity {
+        self.building
+    }
 }
 
 impl Job {
@@ -269,16 +290,9 @@ impl Component for InBuilding {
     type Storage = DenseVecStorage<Self>;
 }
 
-impl InBuilding {
-    pub fn get_location(&self, world: &World) -> Location {
-        let entrance_reader = world
-            .read_component::<BuildingEntrance>();
-        
-        let entrance = entrance_reader
-            .get(self.building)
-            .expect("Failed to get entrance for building!");
-        
-        entrance.location
+impl BuildingContainerComponent for InBuilding {
+    fn get_building(&self) -> Entity {
+        self.building
     }
 }
 
