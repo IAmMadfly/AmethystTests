@@ -8,10 +8,6 @@ pub struct Location {
     y:      f32
 }
 
-impl Component for Location {
-    type Storage = DenseVecStorage<Self>;
-}
-
 impl Clone for Location {
     fn clone(&self) -> Self {
         Location {
@@ -49,7 +45,8 @@ impl Location {
 pub struct Building {
     _id:                u32,
     pub size:           [f32; 2],
-    occupants:          Vec<(Entity, time::PrimitiveDateTime)>
+    occupants:          Vec<(Entity, time::PrimitiveDateTime)>,
+    entrance:           Location
 }
 
 impl Component for Building {
@@ -57,11 +54,12 @@ impl Component for Building {
 }
 
 impl Building {
-    pub fn new (id: u32, size: [f32; 2]) -> Self {
+    pub fn new (id: u32, size: [f32; 2], entrance: Location) -> Self {
         Building {
             _id:        id,
             size,
-            occupants:  Vec::new()
+            occupants:  Vec::new(),
+            entrance
         }
     }
 
@@ -78,29 +76,30 @@ impl Building {
     }
 }
 
-pub struct BuildingEntrance {
-    pub location:   Location
-}
 
-impl Component for BuildingEntrance {
-    type Storage = DenseVecStorage<Self>;
-}
+// pub struct BuildingEntrance {
+//     pub location:   Location
+// }
 
-impl Clone for BuildingEntrance {
-    fn clone(&self) -> Self {
-        BuildingEntrance {
-            location:   self.location.clone()
-        }
-    }
-}
+// impl Component for BuildingEntrance {
+//     type Storage = DenseVecStorage<Self>;
+// }
 
-impl BuildingEntrance {
-    pub fn new(location: Location) -> Self {
-        BuildingEntrance {
-            location
-        }
-    }
-}
+// impl Clone for BuildingEntrance {
+//     fn clone(&self) -> Self {
+//         BuildingEntrance {
+//             location:   self.location.clone()
+//         }
+//     }
+// }
+
+// impl BuildingEntrance {
+//     pub fn new(location: Location) -> Self {
+//         BuildingEntrance {
+//             location
+//         }
+//     }
+// }
 
 #[derive(Default)]
 pub struct MaxOccupants {

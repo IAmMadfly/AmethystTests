@@ -20,7 +20,7 @@ use std::{
     fs::File
     };
 
-use rand::Rng;
+use tiled;
 
 use crate::tools::coordinates::GridLocation;
 
@@ -29,6 +29,15 @@ use crate::states::game::GameState;
 use crate::infection;
 use crate::tools;
 use crate::systems::animation::AnimatedSprite;
+
+fn get_object_group(object_groups: &Vec<tiled::ObjectGroup>, name: String) -> Option<&tiled::ObjectGroup> {
+    for object in object_groups {
+        if name == object.name {
+            return Some(object);
+        }
+    }
+    None
+}
 
 pub struct GameStateBuilder {
     map:                Option<tiled::Map>,
@@ -471,6 +480,10 @@ impl GameStateBuilder {
                     (map.width as usize, map.height as usize)
                 );
 
+            let home_object_group = get_object_group(
+                &map.object_groups, 
+                "Homes".to_owned()
+            ).expect("Failed to get home object");
             for object_group in &map.object_groups {
                 if object_group.name == "Homes" {
                     for home_object in &object_group.objects {

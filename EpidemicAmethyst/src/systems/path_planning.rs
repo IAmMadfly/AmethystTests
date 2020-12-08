@@ -11,6 +11,7 @@ use time::{PrimitiveDateTime, Weekday};
 
 use crate::tools::path_planner;
 use crate::infection::population::{self, BuildingContainerComponent};
+use crate::infection::buildings;
 use crate::systems::game_time::PlayStateEnum;
 
 pub struct PathPlanningSystem {
@@ -30,6 +31,7 @@ impl<'s> System<'s> for PathPlanningSystem {
         Read<'s, World>,
         ReadStorage<'s, population::Person>,
         ReadStorage<'s, population::Job>,
+        ReadStorage<'s, buildings::Building>,
         WriteStorage<'s, population::InBuilding>,
         WriteStorage<'s, population::Traveling>,
         WriteStorage<'s, Transform>,
@@ -44,6 +46,7 @@ impl<'s> System<'s> for PathPlanningSystem {
             world,
             people,
             jobs,
+            buildings,
             mut inbuildings,
             mut travels,
             mut transforms,
