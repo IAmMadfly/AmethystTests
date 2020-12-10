@@ -484,185 +484,205 @@ impl GameStateBuilder {
                 &map.object_groups, 
                 "Homes".to_owned()
             ).expect("Failed to get home object");
-            for object_group in &map.object_groups {
-                if object_group.name == "Homes" {
-                    for home_object in &object_group.objects {
-                        match home_object.shape {
-                            tiled::ObjectShape::Rect { width, height } => {
-                                let people_count_prop = home_object.properties
-                                    .get("peopleCount")
-                                    .expect("No peopleCount variable found!");
+            let workplace_object_group = get_object_group(
+                &map.object_groups, 
+                "Workplaces".to_owned()
+            ).expect("Failed to get home object");
+            let walking_path_object_group = get_object_group(
+                &map.object_groups, 
+                "Walking_Path".to_owned()
+            ).expect("Failed to get home object");
 
-                                if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
-                                    people_count += int_val;
-                                } else {
-                                    panic!("Failed on getting person count!");
-                                }
-
-                                let home = {
-                                    let max_occupant_count: usize;
-                                    let prop_val = home_object
-                                                                .properties
-                                                                .get("peopleCount")
-                                                                .expect("Object did not have 'peopleCount' property!");
-                                    
-                                    if let tiled::PropertyValue::IntValue(int_val) = prop_val {
-                                        max_occupant_count = *int_val as usize;
-                                    } else {
-                                        println!("Failed to find 'peopleCount' integer, getting random number!");
-                                        panic!();
-                                    }
-
-                                    println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
-
-                                    let size = [(width/32.0).round(), (height/32.0).round()];
-
-                                    let location = infection::buildings::Location::new(
-                                        (home_object.x/32.0).round(),
-                                        ((map_size.1 as f32 - home_object.y)/32.0).round() - size[1]
-                                    );
-
-                                    let max_occupants = infection::buildings::MaxOccupants::new(
-                                        max_occupant_count
-                                    );
-
-                                    let building = infection::buildings::Building::new(
-                                        home_object.id,
-                                        size
-                                    );
-
-                                    world.create_entity()
-                                        .with(building)
-                                        .with(location)
-                                        .with(max_occupants)
-                                        .build()
-                                };
-
-                                self.houses.push(
-                                    home.clone()
-                                );
-                                
-                                let max_occupants = world
-                                    .read_component::<infection::buildings::MaxOccupants>()
-                                    .get(home)
-                                    .expect("Failed to get building component")
-                                    .get_max_occupants();
-
-                                let mut occupants = Vec::<Entity>::new();
-
-                                for _ in 0..max_occupants {
-
-                                    let sprite_render = SpriteRender {
-                                        sprite_sheet:   self.female_spritesheet.clone().unwrap(),
-                                        sprite_number:  1
-                                    };
-
-                                    let person_builder = infection::population::PersonEntBuilder::new(
-                                        infection::population::Residence::new(home.clone()), 
-                                        sprite_render,
-                                        world
-                                    );
-
-                                    let mut transform = Transform::default();
-
-                                    transform.set_translation_xyz(
-                                        32.0/2.0,
-                                        32.0/2.0,
-                                        1.1
-                                    );
-
-                                    transform.set_grid_xy(2.0-0.5, 2.0-0.5);
-
-                                    let person_ent = person_builder.build(world);
-
-                                    occupants.push(person_ent.clone());
-                                    self.people.push(person_ent);
-                                }
-
-                                let mut building_comp = {world
-                                    .write_component::<infection::buildings::Building>()
-                                };
-                                let building = building_comp
-                                    .get_mut(home)
-                                    .expect("Failed to get building component");
-                                
-                                building.add_occupants(occupants, world);
-                            }
-                            tiled::ObjectShape::Point(x, y) => {
-                                let location = infection::buildings::Location::new(
-                                    (x/32.0).round(), 
-                                    map.height as f32 - (y/32.0).round()
-                                );
-
-                                house_entrance.push(
-                                    infection::buildings::BuildingEntrance::new(location)
-                                );
-                            }
-                            _ => println!("Unknown shape for home building!")
-                        }
-                    }
-                }
-
-                if object_group.name == "WorkPlaces" {
-                    for work_building in &object_group.objects {
-                        match work_building.shape {
-                            tiled::ObjectShape::Rect {width, height} => {
-                                let building_ent  = {
-
-                                    let size = [
-                                        (width/32.0).round(), 
-                                        (height/32.0).round()
-                                    ];
-        
-                                    let location = infection::buildings::Location::new(
-                                        (work_building.x/32.0).round(), 
-                                        ((map_size.1 as f32 - work_building.y)/32.0).round() - size[1]
-                                    );
-                                    
-                                    let building = infection::buildings::Building::new(
-                                        work_building.id, 
-                                        size
-                                    );
-        
-                                    world.create_entity()
-                                        .with(building)
-                                        .with(location)
-                                        .build()
-                                };
-
-                                self.workplaces.push(building_ent);
-                            }
-                            tiled::ObjectShape::Point(x, y) => {
-                                let location = infection::buildings::Location::new(
-                                    (x/32.0).round(), 
-                                    map.height as f32 - (y/32.0).round()
-                                );
-
-                                work_entrance.push(
-                                    infection::buildings::BuildingEntrance::new(location)
-                                );
-                            }
-                            _ => println!("Unrecognised map shape!")
-                        }
-                    }
-                }
-
-                if object_group.name == "Walking_Path" {
-                    for walking_path in &object_group.objects {
-                        let loc = (
-                            (walking_path.x/32.0).floor() as u32, 
-                            (walking_path.y/32.0).floor() as u32
+            let home_entrances = {
+                let mut vec = Vec::new();
+                for home_object in &home_object_group.objects {
+                    if let tiled::ObjectShape::Point(x, y) = home_object.shape {
+                        let location = infection::buildings::Location::new(
+                            (x/32.0).round(), 
+                            map.height as f32 - (y/32.0).round()
                         );
-                        let size = (
-                            (walking_path.width/32.0).ceil() as u32, 
-                            (walking_path.height/32.0).ceil() as u32
+
+                        vec.push(location);
+                    } 
+                }
+                vec
+            };
+
+            let work_entrances = {
+                let mut vec = Vec::new();
+                for workplace_object in &workplace_object_group.objects {
+                    if let tiled::ObjectShape::Point(x, y) = workplace_object.shape {
+                        let location = infection::buildings::Location::new(
+                            (x/32.0).round(), 
+                            map.height as f32 - (y/32.0).round()
+                        );
+
+                        vec.push(location);
+                    } 
+                }
+                vec
+            };
+
+
+            for home_object in home_object_group.objects {
+                match home_object.shape {
+                    tiled::ObjectShape::Rect { width, height } => {
+                        let people_count_prop = home_object.properties
+                            .get("peopleCount")
+                            .expect("No peopleCount variable found!");
+
+                        if let tiled::PropertyValue::IntValue(int_val) = people_count_prop {
+                            people_count += int_val;
+                        } else {
+                            panic!("Failed on getting person count!");
+                        }
+
+                        let home = {
+                            let max_occupant_count: usize;
+                            let prop_val = home_object
+                                                        .properties
+                                                        .get("peopleCount")
+                                                        .expect("Object did not have 'peopleCount' property!");
+                            
+                            if let tiled::PropertyValue::IntValue(int_val) = prop_val {
+                                max_occupant_count = *int_val as usize;
+                            } else {
+                                println!("Failed to find 'peopleCount' integer, getting random number!");
+                                panic!();
+                            }
+
+                            println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
+
+                            let size = [(width/32.0).round(), (height/32.0).round()];
+
+                            let location = infection::buildings::Location::new(
+                                (home_object.x/32.0).round(),
+                                ((map_size.1 as f32 - home_object.y)/32.0).round() - size[1]
+                            );
+
+                            let max_occupants = infection::buildings::MaxOccupants::new(
+                                max_occupant_count
+                            );
+
+                            let building = infection::buildings::Building::new(
+                                home_object.id,
+                                size
+                            );
+
+                            world.create_entity()
+                                .with(building)
+                                .with(max_occupants)
+                                .build()
+                        };
+
+                        self.houses.push(
+                            home.clone()
                         );
                         
-                        world
-                            .write_resource::<tools::path_planner::PathPlanner>()
-                            .add_path_blocks(loc, size);
+                        let max_occupants = world
+                            .read_component::<infection::buildings::MaxOccupants>()
+                            .get(home)
+                            .expect("Failed to get building component")
+                            .get_max_occupants();
+
+                        let mut occupants = Vec::<Entity>::new();
+
+                        for _ in 0..max_occupants {
+
+                            let sprite_render = SpriteRender {
+                                sprite_sheet:   self.female_spritesheet.clone().unwrap(),
+                                sprite_number:  1
+                            };
+
+                            let person_builder = infection::population::PersonEntBuilder::new(
+                                infection::population::Residence::new(home.clone()), 
+                                sprite_render,
+                                world
+                            );
+
+                            let mut transform = Transform::default();
+
+                            transform.set_translation_xyz(
+                                32.0/2.0,
+                                32.0/2.0,
+                                1.1
+                            );
+
+                            transform.set_grid_xy(2.0-0.5, 2.0-0.5);
+
+                            let person_ent = person_builder.build(world);
+
+                            occupants.push(person_ent.clone());
+                            self.people.push(person_ent);
+                        }
+
+                        let mut building_comp = {world
+                            .write_component::<infection::buildings::Building>()
+                        };
+                        let building = building_comp
+                            .get_mut(home)
+                            .expect("Failed to get building component");
+                        
+                        building.add_occupants(occupants, world);
                     }
+                    _ => ()
                 }
+            }
+
+            for work_building in workplace_object_group.objects {
+                match work_building.shape {
+                    tiled::ObjectShape::Rect {width, height} => {
+                        let building_ent  = {
+
+                            let size = [
+                                (width/32.0).round(), 
+                                (height/32.0).round()
+                            ];
+
+                            let location = infection::buildings::Location::new(
+                                (work_building.x/32.0).round(), 
+                                ((map_size.1 as f32 - work_building.y)/32.0).round() - size[1]
+                            );
+                            
+                            let building = infection::buildings::Building::new(
+                                work_building.id,
+                                size
+                            );
+
+                            world.create_entity()
+                                .with(building)
+                                .build()
+                        };
+
+                        self.workplaces.push(building_ent);
+                    }
+                    tiled::ObjectShape::Point(x, y) => {
+                        let location = infection::buildings::Location::new(
+                            (x/32.0).round(), 
+                            map.height as f32 - (y/32.0).round()
+                        );
+
+                        work_entrance.push(
+                            infection::buildings::BuildingEntrance::new(location)
+                        );
+                    }
+                    _ => println!("Unrecognised map shape!")
+                }
+            }
+
+            for walking_path in walking_path_object_group.objects {
+                let loc = (
+                    (walking_path.x/32.0).floor() as u32, 
+                    (walking_path.y/32.0).floor() as u32
+                );
+                let size = (
+                    (walking_path.width/32.0).ceil() as u32, 
+                    (walking_path.height/32.0).ceil() as u32
+                );
+                
+                world
+                    .write_resource::<tools::path_planner::PathPlanner>()
+                    .add_path_blocks(loc, size);
             }
             // Completed loading information into path planner
 
