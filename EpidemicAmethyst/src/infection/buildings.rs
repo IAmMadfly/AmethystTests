@@ -3,9 +3,14 @@ use amethyst::{
     ecs::{Component, DenseVecStorage, DefaultVecStorage, Entity},
 };
 
+#[derive(Default)]
 pub struct Location {
     x:      f32,
     y:      f32
+}
+
+impl Component for Location {
+    type Storage = DefaultVecStorage<Self>;
 }
 
 impl Clone for Location {
@@ -44,7 +49,7 @@ impl Location {
 
 pub struct Building {
     _id:                u32,
-    pub size:           [f32; 2],
+    pub size:           (f32, f32),
     occupants:          Vec<(Entity, time::PrimitiveDateTime)>,
     entrance:           Location
 }
@@ -54,13 +59,17 @@ impl Component for Building {
 }
 
 impl Building {
-    pub fn new (id: u32, size: [f32; 2], entrance: Location) -> Self {
+    pub fn new (id: u32, size: (f32, f32), entrance: Location) -> Self {
         Building {
             _id:        id,
             size,
             occupants:  Vec::new(),
             entrance
         }
+    }
+
+    pub fn get_entrance_location(&self) -> Location {
+        self.entrance.clone()
     }
 
     pub fn add_occupants(&mut self, new_occupants: Vec<Entity>, world: &World) {

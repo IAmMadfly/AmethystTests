@@ -58,8 +58,8 @@ impl<'s> System<'s> for PathPlanningSystem {
         
         for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
             if job.work_active(*datetime) {
-                let start_location = inbuilding.get_location(&*world);
-                let end_location = job.get_location(&*world);
+                let start_location = inbuilding.get_entrance_location(&*world);
+                let end_location = job.get_entrance_location(&*world);
                 
                 let start_location_format = (
                     start_location.block_x() as usize,

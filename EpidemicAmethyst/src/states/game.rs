@@ -135,7 +135,7 @@ impl GameState {
                 .expect("Failed to get Size for home");
 
             if (home_location.x() <= location.0) && (home_location.y() <= location.1) {
-                if ((home_location.x() + home.size[0]) > location.0) & ((home_location.y() + home.size[1]) > location.1) {
+                if ((home_location.x() + home.size.0) > location.0) & ((home_location.y() + home.size.1) > location.1) {
                     return Some(home_ent)
                 }
             }

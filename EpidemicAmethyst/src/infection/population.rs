@@ -5,7 +5,10 @@ use amethyst::{
     core::Transform
 };
 
-use buildings::{BuildingEntrance, Location};
+use buildings::{
+    Location,
+    Building
+};
 use names::{Generator, Name};
 use crate::infection::infection;
 use crate::infection::buildings;
@@ -31,26 +34,6 @@ fn rand_sex() -> Sex {
         Sex::Female
     }
 }
-
-// pub struct Occupants {
-//     people:         Vec<Entity>
-// }
-
-// impl Component for Occupants {
-//     type Storage    = DenseVecStorage<Self>;
-// }
-
-// impl Occupants {
-//     pub fn new() -> Self {
-//         Occupants {
-//             people:     Vec::new()
-//         }
-//     }
-
-//     pub fn add(&mut self, person: Entity) {
-//         self.people.push(person);
-//     }
-// }
 
 pub struct Person {
     name:           String,
@@ -224,15 +207,15 @@ fn get_weekday_index(weekday: Weekday) -> usize {
 pub trait BuildingContainerComponent {
     fn get_building(&self) -> Entity;
 
-    fn get_location(&self, world: &World) -> Location {
-        let entrance_reader = world
-            .read_component::<BuildingEntrance>();
+    fn get_entrance_location(&self, world: &World) -> Location {
+        let building_reader = world
+            .read_component::<Building>();
         
-        let entrance = entrance_reader
+        let building = building_reader
             .get(self.get_building())
-            .expect("Failed to get entrance for building!");
+            .expect("Failed to get building from Entity!");
         
-        entrance.location.clone()
+        building.get_entrance_location()
     }
 }
 
