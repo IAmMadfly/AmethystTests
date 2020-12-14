@@ -78,7 +78,10 @@ impl SimpleState for GameState {
                         screen_size, 
                         transform_comp
                     );
-                    let world_location = ((world_point.x/32.0).floor(), (world_point.y/32.0).floor());
+                    let world_location = (
+                        (world_point.x/32.0).floor() as u32,
+                        (world_point.y/32.0).floor() as u32
+                    );
 
                     if let Some(home) = self.check_home_location(world_location, state_data.world) {
                         println!("Is a home location!!");
@@ -121,21 +124,16 @@ impl GameState {
 
     }
 
-    fn check_home_location(&self, location: (f32, f32), world: &World) -> Option<Entity> {
+    fn check_home_location(&self, location: (u32, u32), world: &World) -> Option<Entity> {
         for home_ent in self.houses.clone() {
-            let home_loc_comp = world.read_component::<infection::buildings::Location>();
             let home_comp = world.read_component::<infection::buildings::Building>();
-
-            let home_location = home_loc_comp
-                .get(home_ent)
-                .expect("Failed to get location for Home");
             
             let home = home_comp
                 .get(home_ent)
                 .expect("Failed to get Size for home");
 
-            if (home_location.x() <= location.0) && (home_location.y() <= location.1) {
-                if ((home_location.x() + home.size.0) > location.0) & ((home_location.y() + home.size.1) > location.1) {
+            if (home.location().block_x() <= location.0) && (home.location().block_y() <= location.1) {
+                if ((home.location().block_x() + home.size().0) > location.0) & ((home.location().block_y() + home.size().1) > location.1) {
                     return Some(home_ent)
                 }
             }

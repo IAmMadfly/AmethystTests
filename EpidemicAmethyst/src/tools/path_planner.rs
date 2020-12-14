@@ -42,8 +42,15 @@ impl PathPoint {
         self.y
     }
 
+    fn get_i64_location(&self) -> (i64, i64) {
+        (
+            self.x() as i64,
+            self.y() as i64
+        )
+    }
+
     fn distance_to(&self, other: &PathPoint) -> u32 {
-        self.x - other.x
+        
     }
 }
 
@@ -106,7 +113,7 @@ impl PathPlanner {
 
         for x  in start_x..end_x {
             for y in start_y..end_y {
-                self.map[x][y]
+                self.map[y][x]
                     .valid = true;
             }
         }
@@ -190,7 +197,7 @@ impl PathPlanner {
                 if x.valid {
                     print!("x");
                 } else {
-                    print!(" ")
+                    print!(".")
                 }
             }
             println!();

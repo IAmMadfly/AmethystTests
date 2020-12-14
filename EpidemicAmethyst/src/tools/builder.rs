@@ -56,8 +56,8 @@ fn get_point_locations(object_group: &tiled::ObjectGroup, map: &tiled::Map) -> V
     for workplace_object in &object_group.objects {
         if let tiled::ObjectShape::Point(x, y) = workplace_object.shape {
             let location = infection::buildings::Location::new(
-                (x/32.0).round(), 
-                map.height as f32 - (y/32.0).round()
+                x, 
+                (map.height * 32) as f32 - (y)
             );
 
             vec.push(location);
@@ -68,20 +68,24 @@ fn get_point_locations(object_group: &tiled::ObjectGroup, map: &tiled::Map) -> V
 
 fn find_building_entrance(
     building_location: &Location,
-    building_size: &(f32, f32),
+    building_size: &(u32, u32),
     entrances: &Vec<Location>
 ) -> Option<Location> {
+    println!("Building location: {:?}, Size: {:?}", (building_location.block_x(), building_location.block_y()), building_size);
     for entrance in entrances {
         // Ensure entrance is a single block below the building
-        if entrance.y() == (building_location.y() - 1.0) {
-
-            if (entrance.x() >= building_location.x()) &&
-            (entrance.x() < (building_location.x() + building_size.0 )) 
+        println!("Entrance: {}", entrance);
+        if entrance.block_y() == (building_location.block_y() - 1) {
+            println!("Suitable Y");
+            if (entrance.block_x() >= building_location.block_x()) &&
+            (entrance.block_x() < (building_location.block_x() + building_size.0 )) 
             {
+                println!("Suitable X");
                 return Some(entrance.clone())
             }
         }
     }
+    println!("Returning none!");
     None
 }
 
@@ -568,12 +572,13 @@ impl GameStateBuilder {
 
                             println!("New home location: {:?}, map size: {:?}", (home_object.x, home_object.y), map_size);
 
-                            let size = ((width/32.0).round(), (height/32.0).round());
+                            let size = ((width/32.0).round() as u32, (height/32.0).round() as u32);
 
                             let building_location = infection::buildings::Location::new(
-                                (home_object.x/32.0).round(),
-                                ((map_size.1 as f32 - home_object.y)/32.0).round() - size.1
+                                home_object.x,
+                                map_size.1 as f32 - (home_object.y + height)
                             );
+                            println!("New Home location ({}): {}", home_object.id, building_location);
 
                             let max_occupants = infection::buildings::MaxOccupants::new(
                                 max_occupant_count
@@ -586,7 +591,8 @@ impl GameStateBuilder {
                                     &building_location,
                                     &size,
                                     &home_entrances
-                                ).expect("Failed to find entrance for Home")
+                                ).expect("Failed to find entrance for Home"),
+                                building_location
                             );
 
                             world.create_entity()
@@ -655,14 +661,15 @@ impl GameStateBuilder {
                         let building_ent  = {
 
                             let size = (
-                                (width/32.0).round(), 
-                                (height/32.0).round()
+                                (width/32.0).round() as u32, 
+                                (height/32.0).round() as u32
                             );
 
                             let building_location = infection::buildings::Location::new(
-                                (work_building.x/32.0).round(), 
-                                ((map_size.1 as f32 - work_building.y)/32.0).round() - size.1
+                                work_building.x, 
+                                map_size.1 as f32 - (work_building.y + height)
                             );
+                            println!("New Work location ({}): {}", work_building.id, building_location);
                             
                             let building = infection::buildings::Building::new(
                                 work_building.id,
@@ -670,7 +677,8 @@ impl GameStateBuilder {
                                 find_building_entrance(
                                     &building_location,
                                     &size,
-                                    &work_entrances).expect("Failed to get entrance for Workplace")
+                                    &work_entrances).expect("Failed to get entrance for Workplace"),
+                                building_location
                             );
 
                             world.create_entity()
@@ -715,6 +723,10 @@ impl GameStateBuilder {
                 }
             }
         }
+
+        world
+            .read_resource::<tools::path_planner::PathPlanner>()
+            ._debug_map()
     }
 }
 

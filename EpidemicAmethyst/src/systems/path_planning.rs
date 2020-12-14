@@ -28,7 +28,6 @@ impl Default for PathPlanningSystem {
 
 impl<'s> System<'s> for PathPlanningSystem {
     type SystemData = (
-        Read<'s, World>,
         ReadStorage<'s, population::Person>,
         ReadStorage<'s, population::Job>,
         ReadStorage<'s, buildings::Building>,
@@ -43,7 +42,6 @@ impl<'s> System<'s> for PathPlanningSystem {
     fn run(
         &mut self,
         (
-            world,
             people,
             jobs,
             buildings,
@@ -58,16 +56,27 @@ impl<'s> System<'s> for PathPlanningSystem {
         
         for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
             if job.work_active(*datetime) {
-                let start_location = inbuilding.get_entrance_location(&*world);
-                let end_location = job.get_entrance_location(&*world);
+                let start_building = buildings
+                    .get(inbuilding.get_building())
+                    .expect("Failed to get Building for InBuilding");
+                
+                let end_building = buildings
+                    .get(job.get_building())
+                    .expect("Failed to get Building for Job");
                 
                 let start_location_format = (
-                    start_location.block_x() as usize,
-                    start_location.block_y() as usize
+                    start_building.location().block_x() as usize,
+                    start_building.location().block_y() as usize
                 );
                 let end_location_format = (
-                    end_location.block_x() as usize,
-                    end_location.block_y() as usize
+                    end_building.location().block_x() as usize,
+                    end_building.location().block_y() as usize
+                );
+
+                println!(
+                    "Start location: {},\t End Location: {}",
+                    start_building.location(),
+                    end_building.location()
                 );
                 
                 let path = path_planner

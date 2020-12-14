@@ -403,7 +403,7 @@
     <property name="peopleCount" type="int" value="12"/>
    </properties>
   </object>
-  <object id="22" x="801" y="801.5" width="94.5" height="159">
+  <object id="22" x="801" y="802.833" width="94.5" height="153.667">
    <properties>
     <property name="peopleCount" type="int" value="27"/>
    </properties>
@@ -548,24 +548,24 @@
  <objectgroup id="7" name="WorkPlaces">
   <object id="34" type="4" x="65.3333" y="2" width="145.333" height="156"/>
   <object id="35" type="0" x="226" y="1.33333" width="124.667" height="156.667"/>
-  <object id="36" type="5" x="448.667" y="1.33333" width="145.333" height="159.333"/>
+  <object id="36" type="5" x="450.167" y="3.83333" width="145.833" height="154.333"/>
   <object id="37" type="2" x="608.667" y="2" width="158.667" height="156.667"/>
   <object id="38" type="4" x="1281.33" y="2" width="145.333" height="158"/>
   <object id="39" type="5" x="1440" y="1.33333" width="158.667" height="156"/>
-  <object id="40" type="5" x="1409.33" y="258" width="145.333" height="159.333"/>
+  <object id="40" type="5" x="1409.33" y="258" width="145.333" height="155.333"/>
   <object id="41" type="4" x="1089.33" y="256.667" width="144.667" height="158.667"/>
   <object id="42" type="2" x="1440.67" y="512.667" width="159.333" height="190.667"/>
-  <object id="44" type="4" x="1088" y="556" width="224" height="148.667"/>
+  <object id="44" type="4" x="1088" y="556" width="224" height="146.167"/>
   <object id="45" type="2" x="802" y="226" width="156.667" height="188.667"/>
   <object id="46" type="4" x="768" y="513.333" width="158.667" height="189.333"/>
-  <object id="47" type="3" x="544.667" y="268.667" width="222" height="148.667"/>
+  <object id="47" type="3" x="544.667" y="268.667" width="222" height="145.167"/>
   <object id="48" type="3" x="609.333" y="544.667" width="144.667" height="158.667"/>
   <object id="50" type="1" x="161.333" y="257.333" width="242" height="157.333"/>
   <object id="51" type="0" x="0.666667" y="225.333" width="126.667" height="190.667"/>
   <object id="52" type="5" x="64.5" y="546" width="30" height="157"/>
   <object id="53" type="5" x="160.5" y="546" width="146" height="157"/>
   <object id="54" type="0" x="321" y="513.5" width="125.5" height="190.5"/>
-  <object id="55" type="4" x="1376.5" y="801.5" width="146.5" height="159"/>
+  <object id="55" type="4" x="1376.5" y="801.5" width="146.5" height="156.5"/>
   <object id="56" type="0" x="961" y="812" width="222.5" height="147"/>
   <object id="57" type="0" x="544.5" y="812.5" width="224" height="146.5"/>
   <object id="59" type="1" x="160.5" y="801" width="244.5" height="158.5"/>
@@ -575,10 +575,10 @@
   <object id="63" type="0" x="864.5" y="1068.5" width="223" height="146.5"/>
   <object id="64" type="0" x="1089" y="1024.5" width="127.5" height="190.5"/>
   <object id="65" type="2" x="1344.5" y="1025.5" width="159.5" height="190"/>
-  <object id="66" type="1" x="961.5" y="1314" width="242" height="158.5"/>
-  <object id="67" type="3" x="641" y="1324.5" width="223" height="148"/>
-  <object id="68" type="0" x="512" y="1279.5" width="126.5" height="192.5"/>
-  <object id="69" type="1" x="0" y="1313" width="179.5" height="159"/>
+  <object id="66" type="1" x="961.5" y="1314" width="242" height="155.5"/>
+  <object id="67" type="3" x="641" y="1324.5" width="223" height="144.5"/>
+  <object id="68" type="0" x="512" y="1279.5" width="126.5" height="190"/>
+  <object id="69" type="1" x="0" y="1313" width="179.5" height="156"/>
   <object id="156" x="77.3333" y="174.667">
    <point/>
   </object>

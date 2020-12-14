@@ -1,3 +1,5 @@
+use std::fmt;
+
 use amethyst::{
     prelude::*,
     ecs::{Component, DenseVecStorage, DefaultVecStorage, Entity},
@@ -47,9 +49,16 @@ impl Location {
     }
 }
 
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}) -> ({}, {})", self.x, self.y, self.block_x(), self.block_y())
+    }
+}
+
 pub struct Building {
     _id:                u32,
-    pub size:           (f32, f32),
+    location:           Location,
+    size:               (u32, u32),
     occupants:          Vec<(Entity, time::PrimitiveDateTime)>,
     entrance:           Location
 }
@@ -59,13 +68,22 @@ impl Component for Building {
 }
 
 impl Building {
-    pub fn new (id: u32, size: (f32, f32), entrance: Location) -> Self {
+    pub fn new (id: u32, size: (u32, u32), entrance: Location, location: Location) -> Self {
         Building {
             _id:        id,
             size,
             occupants:  Vec::new(),
-            entrance
+            entrance,
+            location
         }
+    }
+
+    pub fn size(&self) -> &(u32, u32) {
+        &self.size
+    }
+
+    pub fn location(&self) -> &Location {
+        &self.location
     }
 
     pub fn get_entrance_location(&self) -> Location {
@@ -84,31 +102,6 @@ impl Building {
         }
     }
 }
-
-
-// pub struct BuildingEntrance {
-//     pub location:   Location
-// }
-
-// impl Component for BuildingEntrance {
-//     type Storage = DenseVecStorage<Self>;
-// }
-
-// impl Clone for BuildingEntrance {
-//     fn clone(&self) -> Self {
-//         BuildingEntrance {
-//             location:   self.location.clone()
-//         }
-//     }
-// }
-
-// impl BuildingEntrance {
-//     pub fn new(location: Location) -> Self {
-//         BuildingEntrance {
-//             location
-//         }
-//     }
-// }
 
 #[derive(Default)]
 pub struct MaxOccupants {

@@ -250,6 +250,10 @@ impl Job {
         }
     }
 
+    pub fn get_building(&self) -> Entity {
+        self.building
+    }
+
     pub fn work_active(&self, datetime: PrimitiveDateTime) -> bool {
         let index = get_weekday_index(datetime.weekday());
 
@@ -267,6 +271,12 @@ impl Job {
 pub struct InBuilding {
     building:       Entity,
     start_time:     time::PrimitiveDateTime
+}
+
+impl InBuilding {
+    pub fn get_building(&self) -> Entity {
+        self.building
+    }
 }
 
 impl Component for InBuilding {
