@@ -42,14 +42,24 @@ impl PathPoint {
         self.y
     }
 
-    fn get_i64_location(&self) -> (i64, i64) {
+    fn get_i64_location(&self) -> (f32, f32) {
         (
-            self.x() as i64,
-            self.y() as i64
+            self.x() as f32,
+            self.y() as f32
         )
     }
 
-    fn distance_to(&self, other: &PathPoint) -> u32 {
+    fn distance_to(&self, other: &PathPoint) -> f32 {
+        let first_location = self.get_i64_location();
+        let second_location = other.get_i64_location();
+
+        (
+            (first_location.0 - second_location.0).powi(2) +
+            (first_location.1 - second_location.1).powi(2)
+        ).sqrt()
+    }
+
+    fn x_and_y_displacement_to(&self, other: &PathPoint) -> u32 {
         
     }
 }
