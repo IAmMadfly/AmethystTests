@@ -1,6 +1,5 @@
 use std::hash::{Hash, Hasher};
-use amethyst::ecs::storage::GenericWriteStorage;
-use pathfinding::prelude::astar;
+use pathfinding::prelude::{astar, absdiff};
 
 fn get_new_map(size: (usize, usize)) -> Vec<Vec<PathPoint>> {
     let mut vec = Vec::new();
@@ -59,8 +58,8 @@ impl PathPoint {
         ).sqrt()
     }
 
-    fn x_and_y_displacement_to(&self, other: &PathPoint) -> u32 {
-        
+    fn x_y_distance_to(&self, other: &PathPoint) -> u32 {
+        (absdiff(self.x(), other.x()) + absdiff(self.y(), other.y())) as u32
     }
 }
 
@@ -189,7 +188,7 @@ impl PathPlanner {
         let result = astar(
             &start, 
             |p| self.find_succesors(p), 
-            |p| p.distance_to(&end), 
+            |p| p.x_y_distance_to(&end), 
             |p| end.eq(p)
         );
         
