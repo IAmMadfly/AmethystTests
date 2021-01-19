@@ -43,8 +43,8 @@ impl<'a, 'b> SystemDesc<'a, 'b, GameTimeSystem> for GameTimeSystemDesc {
         <GameTimeSystem as System<'_>>::SystemData::setup(world);
 
         world.insert(time::PrimitiveDateTime::new(
-            time::date!(2020-01-01),
-            time::Time::midnight()
+            time::Date::try_from_ymd(2020, 1, 1).expect("Filed to get date!"),
+            time::Time::try_from_hms(8, 30, 0).expect("Failed to get time!'")
         ));
         world.insert(PlayStateEnum::Paused);
 

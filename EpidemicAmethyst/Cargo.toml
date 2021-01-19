@@ -7,13 +7,12 @@ edition =   "2018"
 [dependencies]
 amethyst =      "0.15.3"
 rendy =         "0.5.1"
-shred =         "0.10.2"
+shred =         "0.11.0"
 chrono =        "0.4.19"
 tiled =         "0.9.3"
 pathfinding =   "2.1.1"
-# pathfinding =   "2.0.4"
-time =          "0.2.23"
-rand =          "0.7.3"
+time =          "0.2.24"
+rand =          "0.8.2"
 names =         "0.11.0"
 
 [features]
