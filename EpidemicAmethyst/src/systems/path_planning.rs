@@ -54,7 +54,7 @@ impl<'s> System<'s> for PathPlanningSystem {
         ): Self::SystemData
     ) {
         
-        for (person, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
+        for (_, job, inbuilding) in (&people, &jobs, &mut inbuildings).join() {
             if job.work_active(*datetime) {
                 let start_building = buildings
                     .get(inbuilding.get_building())
@@ -89,6 +89,15 @@ impl<'s> System<'s> for PathPlanningSystem {
                     println!("Found a valid path to work!");
                 } else {
                     println!("Failed to get path to work!");
+                    path_planner._debug_map_with_start_end(
+                        (start_location_format.0 as u32, start_location_format.1 as u32),
+                        (end_location_format.0 as u32, end_location_format.1 as u32)
+                    );
+                    panic!(
+                        "Failed to get path to work!\nStart:{:?}\nEnd:{:?}\n",
+                        start_location_format,
+                        end_location_format,
+                    );
                 }
             }
             

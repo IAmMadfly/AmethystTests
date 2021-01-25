@@ -199,14 +199,33 @@ impl PathPlanner {
     }
 
     pub fn _debug_map(&self) {
-        println!("Printing path map!");
-        
         for y in &self.map {
             for x in y {
                 if x.valid {
                     print!("x");
                 } else {
                     print!(".")
+                }
+            }
+            println!();
+        }
+    }
+
+    pub fn _debug_map_with_start_end(&self, start: (u32, u32), end: (u32, u32)) {
+        for y in &self.map {
+            for x in y {
+                if x.valid && ((x.x() == start.0 && x.y() == start.1) || (x.x() == end.0 && x.y() == end.1)) {
+                    print!("#");
+                } else {
+                    if ((x.x() == start.0 && x.y() == start.1) || (x.x() == end.0 && x.y() == end.1)) {
+                        print!("o");
+                    } else {
+                        if x.valid {
+                            print!("x");
+                        } else {
+                            print!(".")
+                        }
+                    }
                 }
             }
             println!();
